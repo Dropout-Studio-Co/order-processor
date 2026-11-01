@@ -4,7 +4,7 @@
 
 Converts Shopify order export CSVs into courier-ready Excel files for the [SteadFast](https://steadfast.com.bd) delivery service in Bangladesh. Sign in with Google, upload a CSV, review and edit the parsed orders in-app, then download a `.xlsx` file — no manual reformatting. An AI copilot can edit the batch for you through natural-language commands.
 
-**Live**: https://order-processor.beyourahi.workers.dev
+**Live**: https://order-processor.dropoutstudio.co
 
 Part of the Dropout Studio tools, alongside [Invoice Generator](https://github.com/Dropout-Studio-Co/invoice-generator) and [Day Zero](https://github.com/Dropout-Studio-Co/day-zero) — same stack, same Dropout Design System.
 
@@ -120,7 +120,7 @@ bun run deploy
 2. Create an OAuth 2.0 Client ID (Web application)
 3. Add authorized redirect URIs:
     - `http://localhost:5173/api/auth/callback/google` (local)
-    - `https://order-processor.beyourahi.workers.dev/api/auth/callback/google` (production)
+    - `https://order-processor.dropoutstudio.co/api/auth/callback/google` (production)
 
 ---
 
