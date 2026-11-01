@@ -45,3 +45,7 @@ src/lib/ds
 # Generated Drizzle migrations — tool-generated snapshots/SQL; prettier reformatting
 # them fights drizzle's output and dirties the tree on every format run.
 migrations/
+
+# Tool-owned agent config (Backpass writes it in its own layout); reformatting it
+# here is reverted on the next write and dirties the tree for no gain.
+.backpassrc.json
