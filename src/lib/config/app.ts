@@ -13,7 +13,7 @@ export const APP_CONFIG: AppConfig = {
     url: "https://order-processor.dropoutstudio.co",
     repository: {
         type: "git",
-        url: "https://github.com/beyourahi/order-processor"
+        url: "https://github.com/Dropout-Studio-Co/order-processor"
     },
     author: {
         name: "Dropout Studio",

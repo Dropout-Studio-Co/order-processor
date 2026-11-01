@@ -6,7 +6,7 @@ Converts Shopify order export CSVs into courier-ready Excel files for the [Stead
 
 **Live**: https://order-processor.beyourahi.workers.dev
 
-Part of the Dropout Studio tools, alongside [Invoice Generator](https://github.com/beyourahi/invoice-generator) and [Day Zero](https://github.com/beyourahi/day-zero) — same stack, same Dropout Design System.
+Part of the Dropout Studio tools, alongside [Invoice Generator](https://github.com/Dropout-Studio-Co/invoice-generator) and [Day Zero](https://github.com/Dropout-Studio-Co/day-zero) — same stack, same Dropout Design System.
 
 ---
 
@@ -33,7 +33,7 @@ Part of the Dropout Studio tools, alongside [Invoice Generator](https://github.c
 **Prerequisites**: Bun, a Cloudflare account with a D1 database named `order_processor`, a Google Cloud OAuth 2.0 client.
 
 ```bash
-git clone https://github.com/beyourahi/order-processor.git
+git clone https://github.com/Dropout-Studio-Co/order-processor.git
 cd order-processor
 bun install
 ```
