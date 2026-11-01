@@ -1,0 +1,132 @@
+name: ci
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ci-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.sha }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+    lint:
+        name: secrets, audit and lint
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        env:
+            GITLEAKS_VERSION: 8.30.1
+            GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        steps:
+            - name: Check out
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - name: Find the commits to check
+              id: range
+              env:
+                  EVENT: ${{ github.event_name }}
+                  PR_BASE: ${{ github.event.pull_request.base.sha }}
+                  PUSH_BEFORE: ${{ github.event.before }}
+              run: |
+                  range=""
+                  if [ "$EVENT" = pull_request ]; then range="$PR_BASE..HEAD"
+                  elif [ "$EVENT" = push ]; then
+                    if [ -n "$PUSH_BEFORE" ] && ! printf '%s' "$PUSH_BEFORE" | grep -Eqx '0+' \
+                      && git merge-base --is-ancestor "$PUSH_BEFORE" HEAD 2>/dev/null; then range="$PUSH_BEFORE..HEAD"
+                    fi
+                  fi
+                  echo "range=$range" >> "$GITHUB_OUTPUT"
+                  echo "Range: ${range:-everything}"
+
+            - name: Scan new commits for secrets
+              env:
+                  RANGE: ${{ steps.range.outputs.range }}
+              run: |
+                  curl -fsSL -o "$RUNNER_TEMP/gitleaks.tgz" \
+                    "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+                  echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
+                  tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
+                  if [ -n "$RANGE" ]; then
+                    echo "Scanning $RANGE"
+                    "$RUNNER_TEMP/gitleaks" git --no-banner --redact --exit-code 1 --log-opts="$RANGE" .
+                  else
+                    echo "No known previous commit; scanning all history"
+                    "$RUNNER_TEMP/gitleaks" git --no-banner --redact --exit-code 1 .
+                  fi
+
+            - uses: ./.github/actions/setup
+
+            # Informational: the lockfile currently carries known advisories with no
+            # patched release in range (xlsx 0.18.5, undici via wrangler, better-auth,
+            # zod via better-auth). Reported in the step summary; not a gate until the
+            # affected packages ship fixes. Re-tighten by deleting `continue-on-error`.
+            - name: Dependency audit (high and critical, informational)
+              id: audit
+              continue-on-error: true
+              run: bun audit --audit-level=high
+
+            - name: Restore lint caches
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+              with:
+                  path: node_modules/.cache/lint
+                  key: lint-${{ runner.os }}-${{ hashFiles('bun.lock', '.prettierrc', '.prettierignore', 'eslint.config.js') }}-${{ github.sha }}
+                  restore-keys: lint-${{ runner.os }}-${{ hashFiles('bun.lock', '.prettierrc', '.prettierignore', 'eslint.config.js') }}-
+
+            - name: Prettier
+              run: |
+                  mkdir -p node_modules/.cache/lint
+                  bunx prettier --check --cache --cache-strategy content --cache-location node_modules/.cache/lint/prettier .
+
+            - name: ESLint
+              run: bunx eslint --cache --cache-strategy content --cache-location node_modules/.cache/lint/eslint .
+
+            - name: Summarize
+              if: always()
+              run: |
+                  {
+                    echo "### lint"
+                    echo ""
+                    echo "- dependency audit: ${{ steps.audit.outcome }} (informational)"
+                    echo "- runner: \`$RUNNER_NAME\` · node \`$(node --version)\` · bun \`$(bun --version)\`"
+                    echo "- commit: \`${{ github.sha }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+    typecheck:
+        name: types and tests
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Check out
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+              with:
+                  persist-credentials: false
+
+            - uses: ./.github/actions/setup
+
+            - name: Typecheck
+              run: bun run check
+
+            - name: Unit tests
+              run: bun run test
+
+    build:
+        name: build
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Check out
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+              with:
+                  persist-credentials: false
+
+            - uses: ./.github/actions/setup
+
+            - name: Build
+              run: bun run build
