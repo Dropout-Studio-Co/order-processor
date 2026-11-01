@@ -406,12 +406,11 @@ For `db:push` and `db:studio`, set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE
 
 ## Testing Practices
 
-No test framework is currently configured. When adding tests:
+Vitest is configured (`vite.config.ts` `test` block, `bun run test` / `test:watch`); CI runs lint, types+tests and build on every PR.
 
-- Use Vitest (already compatible with the Vite setup)
-- Add `vitest` to devDependencies and a `test` script to `package.json`
-- Place test files alongside source: `*.test.ts` or `*.spec.ts`
-- Priority test targets: `data-processing.ts` (CSV parsing), `courier-service.ts` `processOrders()` (format detection, phone normalization, field mapping)
+- Place test files alongside source: `*.test.ts` (the Vitest include glob is `src/**/*.test.ts`, so the vendored `src/lib/ds/*.test.js` node:test contracts are excluded)
+- Node environment only: no network, D1, or browser. `parseCSV` accepts a raw string so the parser is testable without a `FileReader`
+- Priority test targets: `data-processing.ts` (CSV parsing), `courier-service.ts` `processOrders()` (format detection, phone normalization, field mapping), `phone.ts`, `validate.ts`, `excel.ts`
 
 ## Development Environment
 
