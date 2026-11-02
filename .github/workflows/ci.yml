@@ -63,20 +63,40 @@ jobs:
 
             - uses: ./.github/actions/setup
 
-            # Informational: the lockfile currently carries known advisories with no
-            # patched release in range (xlsx 0.18.5, undici via wrangler, better-auth,
-            # zod via better-auth). Reported in the step summary; not a gate until the
-            # affected packages ship fixes. Re-tighten by deleting `continue-on-error`.
-            - name: Dependency audit (high and critical, informational)
+            # Blocking gate: any critical advisory fails the job. Highs stay visible in the
+            # log and step summary but do not gate — the remaining ones are transitive with
+            # no in-range fix (xlsx 0.18.5 has no patched npm release; SheetJS publishes
+            # fixed builds outside npm), so gating on them would only block unrelated work.
+            - name: Dependency audit (critical blocks, highs visible)
               id: audit
-              continue-on-error: true
-              run: bun audit --audit-level=high
+              run: |
+                  set -euo pipefail
+                  bun audit --audit-level=critical
+
+                  set +e
+                  bun audit --audit-level=high > "$RUNNER_TEMP/audit-high.txt" 2>&1
+                  high_status=$?
+                  set -e
+                  {
+                    echo "### Dependency audit"
+                    echo ""
+                    echo "- critical: gate passed (0 critical advisories)"
+                    if [ "$high_status" -eq 0 ]; then
+                      echo "- high: none"
+                    else
+                      echo "- high: present, non-blocking (no in-range fix) — see log"
+                      echo ""
+                      echo '```'
+                      grep -E '^[[:space:]]*(high|moderate|critical):|[0-9]+ vulnerabilities' "$RUNNER_TEMP/audit-high.txt" | head -n 20
+                      echo '```'
+                    fi
+                  } >> "$GITHUB_STEP_SUMMARY"
 
             - name: Restore lint caches
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
               with:
                   path: node_modules/.cache/lint
-                  key: lint-${{ runner.os }}-${{ hashFiles('bun.lock', '.prettierrc', '.prettierignore', 'eslint.config.js') }}-${{ github.sha }}
+                  key: lint-${{ runner.os }}-${{ hashFiles('bun.lock', '.prettierrc', '.prettierignore', 'eslint.config.js') }}
                   restore-keys: lint-${{ runner.os }}-${{ hashFiles('bun.lock', '.prettierrc', '.prettierignore', 'eslint.config.js') }}-
 
             - name: Prettier
@@ -93,7 +113,7 @@ jobs:
                   {
                     echo "### lint"
                     echo ""
-                    echo "- dependency audit: ${{ steps.audit.outcome }} (informational)"
+                    echo "- dependency audit: ${{ steps.audit.outcome }} (critical gate, highs informational)"
                     echo "- runner: \`$RUNNER_NAME\` · node \`$(node --version)\` · bun \`$(bun --version)\`"
                     echo "- commit: \`${{ github.sha }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
@@ -115,6 +135,9 @@ jobs:
 
             - name: Unit tests
               run: bun run test
+
+            - name: Design-system contract tests
+              run: bun run test:ds
 
     build:
         name: build
