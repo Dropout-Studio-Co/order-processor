@@ -11,6 +11,12 @@ updates:
       groups:
           github-actions:
               patterns: ["*"]
+      # Majors are deliberate migrations, so they are ignored here rather than
+      # proposed weekly. `ignore` filters version updates only; Dependabot
+      # security updates are unaffected and still open on their own.
+      ignore:
+          - dependency-name: "*"
+            update-types: ["version-update:semver-major"]
 
     # Bun reads package.json but Dependabot resolves against the npm registry and
     # updates bun.lock, which is what CI installs with `--frozen-lockfile`.
@@ -27,3 +33,6 @@ updates:
           production-dependencies:
               dependency-type: production
               patterns: ["*"]
+      ignore:
+          - dependency-name: "*"
+            update-types: ["version-update:semver-major"]
