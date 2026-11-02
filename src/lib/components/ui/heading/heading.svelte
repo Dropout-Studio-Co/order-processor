@@ -6,7 +6,7 @@
     <p class="text-4xl sm:text-5xl">🚀</p>
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
-        <Heading as="h1" size="title-lg" weight={600} class="text-balance text-center">Shopify Order Processor</Heading>
+        <Heading as="h1" size="title-lg" weight={600} class="text-center text-balance">Shopify Order Processor</Heading>
         <p class={cn(helperBase, "text-center")}>Turn Chaos into Orders</p>
     </div>
 </div>

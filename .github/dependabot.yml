@@ -1,0 +1,29 @@
+version: 2
+updates:
+    # GitHub Actions: keep the pinned SHAs moving with security fixes and major
+    # bumps in one grouped PR per week instead of one PR per action.
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      open-pull-requests-limit: 5
+      groups:
+          github-actions:
+              patterns: ["*"]
+
+    # Bun reads package.json but Dependabot resolves against the npm registry and
+    # updates bun.lock, which is what CI installs with `--frozen-lockfile`.
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      open-pull-requests-limit: 5
+      groups:
+          dev-dependencies:
+              dependency-type: development
+              patterns: ["*"]
+          production-dependencies:
+              dependency-type: production
+              patterns: ["*"]

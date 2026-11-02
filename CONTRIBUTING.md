@@ -362,21 +362,26 @@ Include:
 
 ## Testing and Validation
 
-There is currently no automated test suite configured. Validation is done through the type checker, linter, build, and manual testing.
+Unit tests run on [Vitest](https://vitest.dev/) (Node environment, no network, D1 or browser) and cover the pure CSV → SteadFast → workbook pipeline plus the BD phone, validation and file-name helpers. `.github/workflows/ci.yml` runs the same commands on every PR and on `main`.
 
 ### Required Validation Steps
 
 ```bash
+bun run lint    # Prettier + ESLint
 bun run check   # svelte-check — TypeScript and Svelte-specific issues
-bun run lint    # ESLint + Prettier
+bun run test    # Vitest (unit tests)
 bun run build   # Confirms the production build succeeds
 ```
 
-Run all three before every commit. Never commit a build that fails any of them. For UI changes, verify visually (screenshot or Playwright) and check both desktop and mobile breakpoints.
+Run all four before every commit. Never commit a build that fails any of them. For UI changes, verify visually (screenshot or Playwright) and check both desktop and mobile breakpoints. For pipeline changes, also run a representative CSV through the app.
 
 ### Adding Tests
 
-When tests are added, use [Vitest](https://vitest.dev/) — it integrates with the existing Vite setup. Add `vitest` to `devDependencies` and a `test` script to `package.json`, and co-locate test files with their source using the `.test.ts` (or `.spec.ts`) suffix. Prioritize pure functions and the core data pipeline — they give the most coverage per test.
+Co-locate tests with their source as `*.test.ts` under `src/lib/`; `vite.config.ts` only collects that suffix, so the vendored `src/lib/ds/*.test.js` contract scripts stay on `node:test` and are never picked up by Vitest. Prioritize pure functions and the core data pipeline — they give the most coverage per test.
+
+- `bun run test` runs the suite once; `bun run test:watch` re-runs on change.
+- Keep tests deterministic: no network, no D1, no timers, no `Date.now()`. PapaParse's browser `File` path needs a `FileReader`; either pass a raw CSV string to `parseCSV` or shim `FileReader` as `src/lib/utils/csv.test.ts` does.
+- Assert on the sheet data structure (`workbook.Sheets[...]["A1"]`, `!ref`) instead of committing binary `.xlsx` fixtures.
 
 ---
 

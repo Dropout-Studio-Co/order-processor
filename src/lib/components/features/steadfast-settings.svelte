@@ -71,7 +71,7 @@
             <button
                 type="button"
                 onclick={() => brandSettings.dismissError(field)}
-                class="text-ink-muted hover:text-foreground focus-visible:outline-signal ease-[var(--ease)] touch-manipulation cursor-pointer rounded underline transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="text-ink-muted hover:text-foreground focus-visible:outline-signal cursor-pointer touch-manipulation rounded underline transition-colors ease-[var(--ease)] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 Dismiss
             </button>

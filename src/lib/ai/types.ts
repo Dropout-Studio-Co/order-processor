@@ -135,11 +135,7 @@ export interface PersistedMessage {
 /* ── Safety / anomaly detection ───────────────────────────────────────────── */
 
 export type AnomalyKind =
-    | "amount_outlier"
-    | "short_address"
-    | "cancellation_language"
-    | "landline_phone"
-    | "duplicate_recipient";
+    "amount_outlier" | "short_address" | "cancellation_language" | "landline_phone" | "duplicate_recipient";
 
 export interface AnomalyResult {
     kind: AnomalyKind;
