@@ -14,7 +14,7 @@ updates:
 
     # Bun reads package.json but Dependabot resolves against the npm registry and
     # updates bun.lock, which is what CI installs with `--frozen-lockfile`.
-    - package-ecosystem: npm
+    - package-ecosystem: bun
       directory: /
       schedule:
           interval: weekly
