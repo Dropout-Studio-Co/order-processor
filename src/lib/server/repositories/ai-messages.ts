@@ -9,7 +9,7 @@
  */
 import { asc, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { aiMessages } from "$lib/server/schema";
+import { aiMessages } from "#lib/server/schema.js";
 
 type Db = DrizzleD1Database<Record<string, never>>;
 

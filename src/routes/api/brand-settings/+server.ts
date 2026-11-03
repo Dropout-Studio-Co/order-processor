@@ -1,29 +1,30 @@
-import { json, error } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
+import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
-import { brandSettings } from "$lib/server/schema";
-import { Courier } from "$lib/types";
-import type { BrandSettingsPatch } from "$lib/types";
+import { brandSettings } from "#lib/server/schema.js";
+import { Courier } from "#lib/types/index.js";
+import type { BrandSettingsPatch } from "#lib/types/index.js";
 import type { RequestHandler } from "./$types";
 
 function requireAuth(locals: App.Locals) {
     if (!locals.user) {
-        error(401, { message: "Not authenticated" });
+        error(401, "Not authenticated");
     }
     return locals.user;
 }
 
-export const GET: RequestHandler = async ({ locals, platform }) => {
+export const GET: RequestHandler = async ({ locals }) => {
     const user = requireAuth(locals);
 
-    if (!platform?.env?.DB) {
-        error(503, { message: "Database unavailable" });
+    if (!env.DB) {
+        error(503, "Database unavailable");
     }
 
-    const db = drizzle(platform.env.DB);
+    const db = drizzle(env.DB);
     const settings = await db.select().from(brandSettings).where(eq(brandSettings.userId, user.id)).get();
 
-    return json({
+    return Response.json({
         success: true,
         data: settings ?? {
             userId: user.id,
@@ -44,44 +45,44 @@ const ALLOWED_KEYS = new Set<keyof BrandSettingsPatch>([
 
 const ALLOWED_COURIERS = new Set<string>(Object.values(Courier));
 
-export const PATCH: RequestHandler = async ({ locals, platform, request }) => {
+export const PATCH: RequestHandler = async ({ locals, request }) => {
     const user = requireAuth(locals);
 
-    if (!platform?.env?.DB) {
-        error(503, { message: "Database unavailable" });
+    if (!env.DB) {
+        error(503, "Database unavailable");
     }
 
     let rawBody: unknown;
     try {
         rawBody = await request.json();
     } catch {
-        error(400, { message: "Invalid JSON body" });
+        error(400, "Invalid JSON body");
     }
 
     if (typeof rawBody !== "object" || rawBody === null || Array.isArray(rawBody)) {
-        error(400, { message: "Invalid request body" });
+        error(400, "Invalid request body");
     }
 
     const patch: BrandSettingsPatch = {};
     for (const [key, value] of Object.entries(rawBody as Record<string, unknown>)) {
         if (!ALLOWED_KEYS.has(key as keyof BrandSettingsPatch)) {
-            error(400, { message: `Unknown field: ${key}` });
+            error(400, `Unknown field: ${key}`);
         }
         if (typeof value !== "string") {
-            error(400, { message: `Field ${key} must be a string` });
+            error(400, `Field ${key} must be a string`);
         }
         (patch as Record<string, string>)[key] = value;
     }
 
     if (patch.merchantId !== undefined && patch.merchantId.trim().length === 0) {
-        error(400, { message: "Merchant ID cannot be empty" });
+        error(400, "Merchant ID cannot be empty");
     }
 
     if (patch.selectedCourier !== undefined && !ALLOWED_COURIERS.has(patch.selectedCourier)) {
-        error(400, { message: `Unknown courier: ${patch.selectedCourier}` });
+        error(400, `Unknown courier: ${patch.selectedCourier}`);
     }
 
-    const db = drizzle(platform.env.DB);
+    const db = drizzle(env.DB);
     const now = new Date();
 
     // Ensure row exists; insert is a no-op when one is already there.

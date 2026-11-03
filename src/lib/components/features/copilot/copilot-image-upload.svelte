@@ -11,8 +11,8 @@
      * Any failure (no OffscreenCanvas, decode error) silently falls back to the
      * original file, so the path degrades rather than blocking the attachment.
      */
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import { MAX_IMAGE_BYTES } from "$lib/ai/image-limits";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import { MAX_IMAGE_BYTES } from "#lib/ai/image-limits.js";
     import { X, Loader2 } from "@lucide/svelte";
 
     const ACCEPTED = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/heic", "image/heif"];

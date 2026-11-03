@@ -10,9 +10,9 @@
      */
     import { tick } from "svelte";
     import { fade, fly } from "svelte/transition";
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import { respondToConfirmation } from "$lib/ai/chat-client";
-    import { motionDuration, DISTANCE } from "$lib/motion";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import { respondToConfirmation } from "#lib/ai/chat-client.js";
+    import { motionDuration, DISTANCE } from "#lib/motion/index.js";
     import { ShieldCheck, Undo2 } from "@lucide/svelte";
     import CopilotAnomalyWarning from "./copilot-anomaly-warning.svelte";
 

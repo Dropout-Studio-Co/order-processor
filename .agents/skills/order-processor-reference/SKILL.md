@@ -19,10 +19,10 @@ SvelteKit application that converts Shopify order export CSVs into courier-ready
 
 | Layer           | Technology                                                                                                                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Framework       | SvelteKit 2.x (Svelte 5 with runes)                                                                                                                                                        |
+| Framework       | SvelteKit 3.x (Svelte 5 with runes)                                                                                                                                                        |
 | Language        | TypeScript 6.x (strict mode, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`)                                                                                                     |
 | Styling         | Tailwind CSS 4.x (`@tailwindcss/vite`) + design tokens from vendored `@dropout/ds`                                                                                                         |
-| Design System   | `@dropout/ds` vendored at `src/lib/ds/`, imported via `$lib/ds` (tokens + primitives)                                                                                                      |
+| Design System   | `@dropout/ds` vendored at `src/lib/ds/`, imported via `#lib/ds` (tokens + primitives)                                                                                                      |
 | UI Components   | shadcn-svelte (new-york, zinc) + CVA in `src/lib/components/ui/` (coexists with the DS)                                                                                                    |
 | Auth            | Better Auth (Drizzle adapter) — Google OAuth + Google One Tap + passkey/WebAuthn biometrics                                                                                                |
 | Database        | Cloudflare D1 (SQLite) via Drizzle ORM                                                                                                                                                     |
@@ -55,7 +55,7 @@ CSV Upload --> PapaParse --> Auto-detect Shopify format --> Extract/deduplicate 
 ### Service Layer
 
 ```
-processOrders(rawData, user)  ($lib/services/courier-service.ts)
+processOrders(rawData, user)  (#lib/services/courier-service.ts)
   --> isShopifyExport(header) ? prepareShopifySteadFastOrderData : prepareSteadFastOrderData  (data-processing.ts)
   --> map prepared [Name, Address, Phone, Amount, Note] rows --> SteadFastOrder[]
 ```
@@ -67,17 +67,17 @@ second courier by branching inside `processOrders` (or splitting it) when one ac
 ### Client State & API Layer
 
 ```
-$lib/api/client.ts
+#lib/api/client.ts
   --> api.{get,post,patch,put,delete}<T>()  -- typed fetch wrapper, throws on non-2xx
   --> debounceSync(key, delayMs, fn, opts)   -- per-key debounce with onState callbacks
 
-$lib/stores/brand-settings.svelte.ts        -- closure-based runes store (NOT writable())
+#lib/stores/brand-settings.svelte.ts        -- closure-based runes store (NOT writable())
   --> brandSettings.value                   -- reactive BrandSettingsState
   --> brandSettings.hydrate(initial)        -- called synchronously in +page.svelte via untrack()
   --> brandSettings.updateField(key, value) -- debounces PATCH /api/brand-settings with retry
   --> brandSettings.fieldState(key) / fieldError(key) / dismissError(key) -- per-field SaveState (each field has its own retry budget; aggregate `saveState` getter rolls them up for beforeunload)
 
-$lib/stores/app.svelte.ts                   -- thin facades over brandSettings
+#lib/stores/app.svelte.ts                   -- thin facades over brandSettings
   --> courierService.value                  -- reads selectedCourier via brandSettings (resolves to SteadFast default)
   --> hasMerchantId()                       -- function (not a derived store)
 ```
@@ -107,21 +107,21 @@ copilot-sidebar.svelte --> chat-client.sendMessage()
       --> mutates the grid via copilotBridge.editor --> pushes AI undo snapshot
 ```
 
-- **Model routing — BYO REST** (`$lib/ai/client.ts` → `$lib/server/ai/run-rest.ts`): chat runs the
+- **Model routing — BYO REST** (`#lib/ai/client.ts` → `#lib/server/ai/run-rest.ts`): chat runs the
   user's single chosen model on the user's account via `POST /accounts/{id}/ai/run/{model}` (buffered,
   not streamed; `client.ts` still emits the same `text`/`tool_call` Frame contract). There is NO runtime
   fallback chain and no AI Gateway route — `DEFAULT_MODEL` (`@cf/moonshotai/kimi-k2.7-code`) lives in the
-  live BYO layer `$lib/server/ai/run-rest.ts`. The per-user token is AES-GCM
+  live BYO layer `#lib/server/ai/run-rest.ts`. The per-user token is AES-GCM
   encrypted in `user_settings` and decrypted per request with `TOKEN_ENCRYPTION_KEY`; connecting an
   account + picking a model happens at `/settings`. **Image-bearing turns route to a dedicated vision
   model** — `VISION_MODEL` (`@cf/mistralai/mistral-small-3.1-24b-instruct`) in `chat/+server.ts`, tools
   still attached; text-only turns stay on the user's chosen brain model. Images ride as `image_url`
   content parts (`buildUserContent` emits a plain string when there are no images, else a
   `[text, ...image_url]` array). The chat endpoint caps uploads at `MAX_IMAGES` (3)
-  × `MAX_IMAGE_DATA_URL_CHARS` (~8MB, `$lib/ai/image-limits.ts`) and enforces a per-user 20-req/60s budget
+  × `MAX_IMAGE_DATA_URL_CHARS` (~8MB, `#lib/ai/image-limits.ts`) and enforces a per-user 20-req/60s budget
   (`checkChatRateLimit`). `stableConversationId` (SHA-256 of the first user message) is retained for
   session affinity without leaking content.
-- **RAG** (`$lib/ai/rag.ts` + `embeddings.ts` + `knowledge.ts`): retrieve-wide → rerank → narrow. A
+- **RAG** (`#lib/ai/rag.ts` + `embeddings.ts` + `knowledge.ts`): retrieve-wide → rerank → narrow. A
   static `KNOWLEDGE_CORPUS` is embedded with qwen3 (`@cf/qwen/qwen3-embedding-0.6b`, 1024 dims) into the
   owner's `VECTORIZE` index `order-processor-kb`. Each turn embeds the query on the USER's own account
   (`runEmbeddingViaRest`), pulls 12 candidates (`CANDIDATE_TOPK`, cosine floor `PRE_RERANK_COSINE_FLOOR`
@@ -131,14 +131,14 @@ copilot-sidebar.svelte --> chat-client.sendMessage()
   every stage — a Vectorize/AI/reranker failure fails open (falls back to cosine order or degrades
   silently). The one-time owner seed (`POST /api/copilot/seed`, guarded by `SEED_SECRET` + `x-seed-secret`)
   embeds the corpus with the owner's bound `env.AI`.
-- **D1 history** (`$lib/server/repositories/ai-conversations.ts` + `ai-messages.ts`):
+- **D1 history** (`#lib/server/repositories/ai-conversations.ts` + `ai-messages.ts`):
   conversations + messages persist in the `ai_conversations` / `ai_messages` tables, so chats are
   resumable across reloads. `+page.server.ts` loads conversation summaries; messages load lazily on
   switch via `/api/copilot/messages`. Persistence is best-effort and never blocks the live stream.
-- **The bridge** (`$lib/stores/copilot-bridge.svelte.ts`): `output-editor.svelte` registers
+- **The bridge** (`#lib/stores/copilot-bridge.svelte.ts`): `output-editor.svelte` registers
   an `EditorController`, `order-processor.svelte` an `IngestionController`. Grid tools fail
   gracefully when nothing is registered (no CSV loaded).
-- **Tools** (`$lib/ai/tools-catalog.ts` + `schemas.ts`): 11 typed tools — `editCells`,
+- **Tools** (`#lib/ai/tools-catalog.ts` + `schemas.ts`): 11 typed tools — `editCells`,
   `setBatchDefaults`, `addRows`, `deleteRows`, `autoFixWarnings`, `updateBrandSettings`,
   `proposeCsvColumnMapping`, `getBatchSummary`, `getRows`, `flagAnomalies`, `undoLastChange`.
 - **Undo is separate** from the editor's native Cmd+Z (`copilot.undoStack`): each mutation
@@ -148,14 +148,14 @@ copilot-sidebar.svelte --> chat-client.sendMessage()
 - **Multilingual**: the system prompt (`prompts.ts`, `PROMPT_VERSION` `v4`) replies in Bangla
   (Bengali script or romanized) when the user writes Bangla, English otherwise, leaving names,
   amounts, phones, addresses, and identifiers unchanged.
-- **State** (`$lib/stores/copilot.svelte.ts`): a D1-backed closure-rune store holding the working
+- **State** (`#lib/stores/copilot.svelte.ts`): a D1-backed closure-rune store holding the working
   set of conversations + messages; `chat-client.ts` owns the network calls (create/list/load/
   rename/delete) and feeds results back. A new chat starts local (`persisted: false`); the server
   mints the real id on the first turn and the client adopts it via `adoptConversationId`.
 
 ### Design System
 
-**HARD RULE — binding UI law: `~/Desktop/projects/dropout-design-system/GUIDELINES.md`.** Applies automatically to every UI task: theme via tokens, **never recolor a component**, components before custom markup, plus the shadcn-svelte primitive layer (pinned `components.json` preset + blessed kit). Vendored at `src/lib/ds/`, consumed via the `$lib/ds` alias, refreshed with `bun run sync-ds` (never hand-edit); the `@dropout/ds` specifier survives only in vendored doc-comments.
+**HARD RULE — binding UI law: `~/Desktop/projects/dropout-design-system/GUIDELINES.md`.** Applies automatically to every UI task: theme via tokens, **never recolor a component**, components before custom markup, plus the shadcn-svelte primitive layer (pinned `components.json` preset + blessed kit). Vendored at `src/lib/ds/`, consumed via the `#lib/ds` alias, refreshed with `bun run sync-ds` (never hand-edit); the `@dropout/ds` specifier survives only in vendored doc-comments.
 
 - **Exports** (`src/lib/ds/index.ts`): `cn` + components `Cta`/`IconButton`/`Heading`/`Eyebrow`/`Input`/`Tile`/`Select`/`StatusBadge`
   plus the `Settings*` set (`SettingsSection`/`SettingsRow`/`SettingsActions`/`SettingsSaveBar`)
@@ -166,8 +166,8 @@ copilot-sidebar.svelte --> chat-client.sendMessage()
 - **Tokens**: color/type/space/motion-ease CSS vars live in `src/lib/ds/styles/tokens.css`
   (+ optional `animations.css`), `@import`ed once at the top of `app.css`. Use the custom
   `text-{micro,caption,label,body,…,display}` size scale and semantic colors like `text-ink-muted`.
-- **Two `cn()` (gotcha)**: the DS `cn` (`$lib/ds`) extends tailwind-merge to treat the custom
-  `text-*` literals as a `font-size` group; the plain `cn` (`$lib/utils`) does not. In DS markup
+- **Two `cn()` (gotcha)**: the DS `cn` (`#lib/ds`) extends tailwind-merge to treat the custom
+  `text-*` literals as a `font-size` group; the plain `cn` (`#lib/utils`) does not. In DS markup
   that mixes a custom size with a color, use the DS `cn` or the size is **silently dropped**.
 - **Hybrid UI**: shadcn-svelte primitives still live in `src/lib/components/ui/` (button, dialog,
   table, tooltip, input…) and coexist with the DS — both valid; prefer DS tokens/primitives for new
@@ -175,8 +175,8 @@ copilot-sidebar.svelte --> chat-client.sendMessage()
 
 ### Motion
 
-GSAP is the motion engine. All motion code lives under `$lib/motion` and is the **only**
-entry point — surface components import from `$lib/motion`, never from `gsap` directly.
+GSAP is the motion engine. All motion code lives under `#lib/motion` and is the **only**
+entry point — surface components import from `#lib/motion`, never from `gsap` directly.
 
 - **SSR safety (critical)**: GSAP touches `window`/`document` at module eval, so it must
   NEVER load during SSR on Cloudflare Workers. `gsap.ts` is the only file that imports
@@ -208,16 +208,16 @@ Google OAuth / One Tap / passkey --> Better Auth --> D1 sessions --> hooks.serve
 
 - Three sign-in methods, all → the same session: Google OAuth (button), Google One Tap (auto-prompt overlay, same Google client — no new provider/table), and passkey/WebAuthn (platform device biometrics only: Face ID / Touch ID / Windows Hello / Android fingerprint — no roaming security keys)
 - Server plugins in `createAuth()`: `oneTap()` + `passkey({ rpID, rpName, origin, ... })`. Client plugins in `auth-client.ts`: `passkeyClient()` + `oneTapClient({ clientId })`
-- One Tap needs the public `PUBLIC_GOOGLE_CLIENT_ID` (browser-exposed, non-secret, via `$env/dynamic/public`); empty → One Tap silently off, the Google button still works (`/login` guards on `oneTapConfigured`)
+- One Tap needs the public `PUBLIC_GOOGLE_CLIENT_ID` (browser-exposed, non-secret, via `$app/env/public`); empty → One Tap silently off, the Google button still works (`/login` guards on `oneTapConfigured`)
 - Passkey `rpID`/`origin` are derived from `BETTER_AUTH_URL` in `auth.ts` (localhost → both dev+preview origins; else the prod origin) — a mismatch breaks registration/login silently. `authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", userVerification: "required" }` restricts registration to platform biometrics (Face ID / Touch ID — no roaming security keys) and forces the biometric gesture (registration-time only; existing credentials keep working)
 - Auth instance created per-request (Cloudflare Workers provide D1 binding per-request)
-- `createAuth()` factory in `$lib/server/auth.ts` -- not a singleton
+- `createAuth()` factory in `#lib/server/auth.ts` -- not a singleton
 - Session: 7-day expiry, rolling (updated daily), cookie-cached (5 min)
 - Cookie prefix: `order-processor`, secure-only
 - `getCurrentUser()` maps session user to `CurrentUser { name, email }`
 - Rate limiting enabled (20 req/min, D1-backed) — applies across all Cloudflare edge nodes
 - `App.Locals` user/session types derived via `Auth["$Infer"]["Session"]` — don't inline them manually
-- Guest persistence (`$lib/persistence/local.ts`): SSR-safe localStorage helpers; `brandSettings.loadGuest()`
+- Guest persistence (`#lib/persistence/local.ts`): SSR-safe localStorage helpers; `brandSettings.loadGuest()`
   re-seeds from localStorage on guest mount, `migrateGuestToServer()` folds guest settings into an empty
   account on first authed load (never clobbers existing server values)
 
@@ -260,7 +260,7 @@ src/
   lib/
     auth-client.ts                       -- Better Auth client (`authClient`) with `passkeyClient()` + `oneTapClient()` plugins; re-exports `{ signIn, signOut, useSession }` (passkey sign-in via `authClient.signIn.passkey()`, One Tap via `authClient.oneTap()`)
     assets/                              -- static assets (upload.gif, steadfast.png)
-    ds/                                  -- vendored @dropout/ds (import via $lib/ds): index.ts (cn + Cta/IconButton/Heading/Eyebrow/Input/Tile + Settings* + style/biometric helpers), components/, styles/ (tokens.css + animations.css → imported by app.css), utils.ts (DS cn with extended text-* scale)
+    ds/                                  -- vendored @dropout/ds (import via #lib/ds): index.ts (cn + Cta/IconButton/Heading/Eyebrow/Input/Tile + Settings* + style/biometric helpers), components/, styles/ (tokens.css + animations.css → imported by app.css), utils.ts (DS cn with extended text-* scale)
     api/
       client.ts                          -- typed api object (get/patch/delete) + debounceSync
     ai/                                  -- AI Copilot (client): types, schemas (Zod), tools-catalog, prompts, context,
@@ -303,17 +303,17 @@ src/
   hooks.server.ts                        -- auth middleware + security headers
   hooks.client.ts                        -- client-side hooks
   app.css                                -- global Tailwind styles; @imports DS tokens.css + animations.css + lib/styles/chat-animations.css; 16px touch-device font floor; mirrors --motion-* vars
-  app.d.ts                               -- App.Locals, App.Platform, App.PageData, App.Error
+  app.d.ts                               -- App.Locals, App.PageData, App.Error
   app.html                               -- HTML shell
 ```
 
 ### Path Aliases
 
 ```
-$lib     --> src/lib (SvelteKit default, only configured alias)
+#lib     --> src/lib (Node subpath import declared in package.json "imports")
 ```
 
-All imports use `$lib/...` — the other aliases (`$src`, `$components`, `$config`, `$services`, `$types`) are not configured and do not exist.
+All imports use `#lib/...` with explicit module extensions (e.g. `#lib/utils/index.js`) — the other aliases (`$src`, `$components`, `$config`, `$services`, `$types`) are not configured and do not exist. SvelteKit 3 removed the implicit `$lib` alias.
 
 ## Common Commands
 
@@ -381,7 +381,7 @@ For `db:push` and `db:studio`, set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE
 ### TypeScript
 
 - Strict mode with additional flags: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `verbatimModuleSyntax`
-- Use `$lib/` alias imports, never relative paths from route files
+- Use `#lib/` alias imports, never relative paths from route files
 - Barrel exports (`index.ts`) in every module directory
 - Type optional properties with explicit `| undefined` for `exactOptionalPropertyTypes` compatibility (see `app.d.ts` Locals)
 
@@ -399,9 +399,9 @@ For `db:push` and `db:studio`, set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE
 ```
 
 - Use runes (`$state`, `$derived`, `$props`, `$effect`) for Svelte 5 components
-- Global state uses closure-based rune stores in `$lib/stores/*.svelte.ts` — not Svelte `writable()`
+- Global state uses closure-based rune stores in `#lib/stores/*.svelte.ts` — not Svelte `writable()`
 - Tailwind CSS for all styling -- no inline styles, no CSS modules
-- Use `cn()` from `$lib/utils` for conditional/merged Tailwind classes
+- Use `cn()` from `#lib/utils` for conditional/merged Tailwind classes
 - JSDoc on complex business logic functions
 
 ## Testing Practices
@@ -447,11 +447,11 @@ Configured in `wrangler.jsonc`:
 - **Vars**: `BETTER_AUTH_URL` (`https://order-processor.dropoutstudio.co`), `PUBLIC_GOOGLE_CLIENT_ID` (browser-exposed Google client id for One Tap — NOT a secret; empty → One Tap off)
 - **Secrets**: `TOKEN_ENCRYPTION_KEY` (AES-GCM base64 32-byte key encrypting BYO tokens; Copilot 412s without it), `SEED_SECRET` (optional, gates `/api/copilot/seed`)
 
-Access in SvelteKit via `event.platform.env.DB`, typed in `app.d.ts` under `App.Platform`.
+Access in SvelteKit via the `env` export from `cloudflare:workers`, typed by `Cloudflare.Env` in `app.d.ts`.
 
 ### CSRF Protection
 
-Trusted origins configured in `svelte.config.js` (mirrored in `trustedOrigins` in `$lib/server/auth.ts` — keep the two in sync):
+Trusted origins configured in `vite.config.ts` (the `sveltekit()` plugin's `csrf.trustedOrigins`; mirrored in `trustedOrigins` in `#lib/server/auth.ts` — keep the two in sync):
 
 - `http://localhost:5173` (Vite dev)
 - `http://localhost:8787` (Wrangler preview)
@@ -459,13 +459,13 @@ Trusted origins configured in `svelte.config.js` (mirrored in `trustedOrigins` i
 
 ## Project-Specific Warnings
 
-1. **Auth instance is per-request** -- Cloudflare Workers provide D1 binding per-request. `createAuth()` in `$lib/server/auth.ts` is a factory, not a singleton. Never cache the auth instance at module scope.
+1. **Auth instance is per-request** -- Cloudflare Workers provide D1 binding per-request. `createAuth()` in `#lib/server/auth.ts` is a factory, not a singleton. Never cache the auth instance at module scope.
 
-2. **`building` guard in hooks.server.ts** -- During SvelteKit build/prerender, platform bindings (D1) are unavailable. The `if (building)` check is critical. Do not remove it.
+2. **`building` guard in hooks.server.ts** -- During SvelteKit build/prerender, the `cloudflare:workers` env bindings (D1) are unavailable. The `if (building)` check is critical. Do not remove it.
 
 3. **Better Auth column names must be snake_case** -- The Drizzle adapter with `usePlural: true` expects `snake_case` column names in the schema. Deviation causes silent auth failures.
 
-4. **Phone number normalization is Bangladesh-specific** -- `normalizePhoneNumber()` in `$lib/utils/phone.ts` strips non-digits, the leading `+`, the `880` country code, and trunk leading zeros, leaving a bare number (1-prefixed for valid BD mobiles). It is strip-only (idempotent, NOT a validator — pair with `validatePhone()`). Correct only for Bangladesh numbers. `processOrders()` and the output editor's download path both call it.
+4. **Phone number normalization is Bangladesh-specific** -- `normalizePhoneNumber()` in `#lib/utils/phone.ts` strips non-digits, the leading `+`, the `880` country code, and trunk leading zeros, leaving a bare number (1-prefixed for valid BD mobiles). It is strip-only (idempotent, NOT a validator — pair with `validatePhone()`). Correct only for Bangladesh numbers. `processOrders()` and the output editor's download path both call it.
 
 5. **Shopify CSV column indexes are hardcoded** -- Column positions (34 for Shipping Name, 36/37/39 for address parts, 43 for phone, 44 for notes, 11 for total) are based on Shopify's current export format. If Shopify changes their export schema, these break silently.
 
@@ -497,11 +497,11 @@ Trusted origins configured in `svelte.config.js` (mirrored in `trustedOrigins` i
 
 19. **The chat models leak artifacts** -- the BYO Workers AI models intermittently emit reasoning text, stray code fences, and tool calls as plain chat text (and sometimes narrate an action without calling a tool). The Copilot defends in layers: `prompts.ts` hardens the system prompt; `salvage.ts` (`salvageTextToolCalls`) recovers tool calls the model wrote as plain-text JSON instead of structured frames; `chat/+server.ts` detects still-leaked tool-call JSON (`looksLikeLeakedToolCall`) and failed-to-act narrations (`looksImperative`/`REFUSAL_RE`) and runs ONE corrective retry; the message renderer downgrades stray code blocks to plain text; `chat-client.ts` maps every failure to a friendly message. Raw model output, raw errors, and internal tool names must never reach the user — do not strip these guards as redundant.
 
-20. **`E2E_BYPASS_AUTH` is a preview-only auth shortcut** -- when set to `"true"` in `.dev.vars`, `hooks.server.ts` synthesizes an `e2e-test-user` session and upserts it into the local D1, bypassing Google OAuth entirely. It exists for Wrangler preview / E2E runs. NEVER set it in `wrangler.jsonc`, GitHub Actions, or production secrets. The flag is declared optional on `App.Platform.env` in `app.d.ts` so it can stay absent everywhere else.
+20. **`E2E_BYPASS_AUTH` is a preview-only auth shortcut** -- when set to `"true"` in `.dev.vars`, `hooks.server.ts` synthesizes an `e2e-test-user` session and upserts it into the local D1, bypassing Google OAuth entirely. It exists for Wrangler preview / E2E runs. NEVER set it in `wrangler.jsonc`, GitHub Actions, or production secrets. The flag is declared optional on `Cloudflare.Env` in `app.d.ts` so it can stay absent everywhere else.
 
 21. **Copilot rail width is tokenized** -- `--copilot-rail-width` / `--copilot-rail-width-xl` in `app.css` define the right rail's size; the main column reserves space via `lg:pr-[calc(var(--copilot-rail-width)+1.5rem)]` in `+page.svelte`. Change the tokens, not the hard-coded values.
 
-22. **Copilot inference is bring-your-own (BYO) over the Workers AI REST API** -- chat + RAG embedding run on the END USER's own Cloudflare account (`$lib/server/ai/run-rest.ts`, billed to them) with the user's single chosen model — NO runtime fallback chain and no AI Gateway route (`DEFAULT_MODEL` lives in `run-rest.ts`). Connecting an account + picking a model happens at `/settings`; the endpoint returns 412 (with `connect: "/settings"`) until a token + account id are saved.
+22. **Copilot inference is bring-your-own (BYO) over the Workers AI REST API** -- chat + RAG embedding run on the END USER's own Cloudflare account (`#lib/server/ai/run-rest.ts`, billed to them) with the user's single chosen model — NO runtime fallback chain and no AI Gateway route (`DEFAULT_MODEL` lives in `run-rest.ts`). Connecting an account + picking a model happens at `/settings`; the endpoint returns 412 (with `connect: "/settings"`) until a token + account id are saved.
 
 23. **Copilot chat is model-stateless but D1-persisted** -- the model never sees stored history; the client re-ships the full conversation + rendered CURRENT STATE every turn. Separately, `chat/+server.ts` writes each turn to `ai_conversations` / `ai_messages` so chats resume after reload. Persistence is best-effort and wrapped in try/catch — it must NEVER abort or block the live SSE stream. (This supersedes the old "in-memory only, no D1 tables" design.)
 
@@ -511,15 +511,15 @@ Trusted origins configured in `svelte.config.js` (mirrored in `trustedOrigins` i
 
 26. **Changelog is hand-curated, not generated** -- `src/lib/data/changelog.ts` (`CHANGELOG_ENTRIES`) is the single source for the public `/changelog` route, written in plain merchant-facing English (no commit hashes/jargon). Entries must stay newest-first with ISO `YYYY-MM-DD` dates; the page tags the newest group "Latest" and relies on the ordering instead of sorting. NEVER render relative dates ("x days ago") — they mismatch the SSR render and trip hydration. Prepend new entries when shipping user-visible changes.
 
-27. **BYO Cloudflare token is encrypted at rest** -- the user's API token lives AES-GCM encrypted in `user_settings.cloudflare_token_encrypted` (`[12-byte IV] || ciphertext+tag`, `$lib/server/crypto.ts`), keyed by `TOKEN_ENCRYPTION_KEY` (base64, exactly 32 bytes — `deriveTokenKey` throws otherwise). It is decrypted server-side only: per chat turn to call the REST API, and on the settings load solely to mask it (`maskToken`). The raw secret never reaches the client. The settings `save` action validates a new token by listing the account's models BEFORE encrypting (proves token + account + Workers AI permission); an empty token field preserves the existing blob.
+27. **BYO Cloudflare token is encrypted at rest** -- the user's API token lives AES-GCM encrypted in `user_settings.cloudflare_token_encrypted` (`[12-byte IV] || ciphertext+tag`, `#lib/server/crypto.ts`), keyed by `TOKEN_ENCRYPTION_KEY` (base64, exactly 32 bytes — `deriveTokenKey` throws otherwise). It is decrypted server-side only: per chat turn to call the REST API, and on the settings load solely to mask it (`maskToken`). The raw secret never reaches the client. The settings `save` action validates a new token by listing the account's models BEFORE encrypting (proves token + account + Workers AI permission); an empty token field preserves the existing blob.
 
-28. **Per-user Copilot rate limit reuses the `rate_limits` table** -- `checkChatRateLimit` (`$lib/server/rate-limit.ts`) enforces 20 chat turns / 60s per user under a `copilot-chat:<userId>` key, separate from Better Auth's own per-route keys in the same table. Fixed window (the window start is NOT bumped per request, so a steady stream can't slide it open). It is a cost guard against BYO model spend; the read-modify-write is intentionally non-atomic and fails open when D1 is unbound.
+28. **Per-user Copilot rate limit reuses the `rate_limits` table** -- `checkChatRateLimit` (`#lib/server/rate-limit.ts`) enforces 20 chat turns / 60s per user under a `copilot-chat:<userId>` key, separate from Better Auth's own per-route keys in the same table. Fixed window (the window start is NOT bumped per request, so a steady stream can't slide it open). It is a cost guard against BYO model spend; the read-modify-write is intentionally non-atomic and fails open when D1 is unbound.
 
-29. **Served only at the custom domain** -- `wrangler.jsonc` sets `workers_dev: false` + `preview_urls: false`, so the app runs only at `order-processor.dropoutstudio.co`. OAuth redirect URIs, `BETTER_AUTH_URL`, and the CSRF/`trustedOrigins` lists (`svelte.config.js` + `$lib/server/auth.ts`) all assume this single host. Re-enabling `*.workers.dev` or preview URLs means adding those origins everywhere, or auth/CSRF breaks.
+29. **Served only at the custom domain** -- `wrangler.jsonc` sets `workers_dev: false` + `preview_urls: false`, so the app runs only at `order-processor.dropoutstudio.co`. OAuth redirect URIs, `BETTER_AUTH_URL`, and the CSRF/`trustedOrigins` lists (`vite.config.ts` + `#lib/server/auth.ts`) all assume this single host. Re-enabling `*.workers.dev` or preview URLs means adding those origins everywhere, or auth/CSRF breaks.
 
 30. **Passkey `rpID`/`origin` are derived from `BETTER_AUTH_URL`** -- `auth.ts` computes the WebAuthn `rpID` (hostname) and allowed `origin` from `BETTER_AUTH_URL` (localhost → both `:5173`+`:8787` dev origins; else the prod origin). WebAuthn binds credentials to the exact rpID + origin, so a stale/mismatched `BETTER_AUTH_URL` makes passkey register/login fail **silently** with no useful error. Keep `BETTER_AUTH_URL` correct per environment. Passkeys are platform-bound — a device registers its own; clearing the `passkeys` table forces re-registration.
 
-31. **Google One Tap depends on `PUBLIC_GOOGLE_CLIENT_ID`** -- the browser-public client id is read via `$env/dynamic/public` in `auth-client.ts`; `/login` only fires the One Tap prompt when it's set (`oneTapConfigured`). It is NOT a secret (it appears in every OAuth redirect) — set it as a plain `var` in `wrangler.jsonc`/`.dev.vars`, never via `wrangler secret`. Empty → One Tap is simply off; the Google OAuth button and passkeys still work.
+31. **Google One Tap depends on `PUBLIC_GOOGLE_CLIENT_ID`** -- the browser-public client id is read via `$app/env/public` in `auth-client.ts`; `/login` only fires the One Tap prompt when it's set (`oneTapConfigured`). It is NOT a secret (it appears in every OAuth redirect) — set it as a plain `var` in `wrangler.jsonc`/`.dev.vars`, never via `wrangler secret`. Empty → One Tap is simply off; the Google OAuth button and passkeys still work.
 
 32. **The editor grid must own both scroll axes and the available width** -- while `editorOpen`, `+page.svelte` switches from the centered `--content-x` gutter to the viewport `--content-pad` gutter and keeps the wrapper chain `min-w-0`; preserve that or the grid collapses back to upload-flow width. `Table.Root` (`ui/table/table.svelte`) wraps its `<table>` in its own `<div data-slot="table-container" class="overflow-x-auto">`. Left alone that inner div takes the x-axis and parks its horizontal scrollbar under the LAST row — off-screen until you scroll down, leaving mouse users stuck with Shift+wheel. `editor-grid.svelte` neutralizes it (`[&>[data-slot=table-container]]:overflow-visible`) so the outer `max-h` box scrolls both axes and pins the scrollbar to its bottom edge. `Add row` sits OUTSIDE the scroll box so it can't scroll away horizontally.
 

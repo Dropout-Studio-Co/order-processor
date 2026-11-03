@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Heading, cn, helperBase } from "$lib/ds";
+    import { Heading, cn, helperBase } from "#lib/ds/index.js";
 </script>
 
 <div class="flex flex-col items-center gap-4 text-center sm:gap-6 lg:gap-8">

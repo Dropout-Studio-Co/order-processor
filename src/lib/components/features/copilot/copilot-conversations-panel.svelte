@@ -7,10 +7,10 @@
      * panel never touches the network itself. Rename/delete intentionally use the
      * native `prompt`/`confirm` dialogs to stay dependency-free.
      */
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import { switchConversation, renameConversation, deleteConversation } from "$lib/ai/chat-client";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import { switchConversation, renameConversation, deleteConversation } from "#lib/ai/chat-client.js";
     import { Pencil, Trash2 } from "@lucide/svelte";
-    import { cn } from "$lib/utils";
+    import { cn } from "#lib/utils/index.js";
 
     const onSwitch = (id: string) => {
         void switchConversation(id);

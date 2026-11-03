@@ -3,8 +3,8 @@
 // to import "gsap", and it does so exclusively through the `browser`-guarded
 // dynamic import() in load(). Never add a top-level `import ... from "gsap"`
 // here or anywhere else, and never call load() outside the browser guard.
-import { browser } from "$app/environment";
-import { DURATION, EASE } from "$lib/motion/tokens";
+import { browser } from "$app/env";
+import { DURATION, EASE } from "#lib/motion/tokens.js";
 
 type GsapModule = (typeof import("gsap"))["gsap"];
 type ScrollTriggerModule = (typeof import("gsap/ScrollTrigger"))["ScrollTrigger"];

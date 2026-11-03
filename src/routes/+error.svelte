@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from "$app/state";
     import { goto } from "$app/navigation";
-    import { Button } from "$lib/components";
+    import { Button } from "#lib/components/index.js";
 </script>
 
 <div class="flex min-h-dvh flex-col items-center justify-center gap-8 p-4">

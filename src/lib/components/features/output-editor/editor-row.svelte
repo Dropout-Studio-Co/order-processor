@@ -3,9 +3,9 @@
     import { cubicOut } from "svelte/easing";
     import Check from "@lucide/svelte/icons/check";
     import { Copy, Trash2 } from "@lucide/svelte";
-    import type { SteadFastOrder } from "$lib/types";
-    import { Table } from "$lib/components/ui";
-    import { cn } from "$lib/utils";
+    import type { SteadFastOrder } from "#lib/types/index.js";
+    import { Table } from "#lib/components/ui/index.js";
+    import { cn } from "#lib/utils/index.js";
     import EditorCell, { type CellNavigationDirection } from "./editor-cell.svelte";
     import type { CellColumn, ColumnDescriptor, BatchDefaults } from "./columns";
 

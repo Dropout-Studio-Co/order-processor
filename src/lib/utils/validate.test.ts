@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { SteadFastOrder } from "$lib/types";
+import type { SteadFastOrder } from "#lib/types/index.js";
 import { validateAmount, validateRow } from "./validate";
 
 const makeRow = (overrides: Partial<SteadFastOrder> = {}): SteadFastOrder => ({

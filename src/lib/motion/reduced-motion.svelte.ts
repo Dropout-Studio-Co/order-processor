@@ -3,7 +3,7 @@
 // SSR-safe: defaults to false (no reduction) when `window` is unavailable, and
 // the change listener is only attached in the browser. Every motion entry point
 // short-circuits on this — it is the global gate for honouring reduced motion.
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 

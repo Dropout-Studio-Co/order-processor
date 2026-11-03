@@ -6,10 +6,10 @@
  * `projectBatchState` CURRENT STATE block. Errors NEVER surface as raw text in
  * the assistant bubble — friendlyHttpError() maps them onto the error banner.
  */
-import { copilot } from "$lib/stores/copilot.svelte";
-import { copilotBridge } from "$lib/stores/copilot-bridge.svelte";
-import { brandSettings } from "$lib/stores";
-import { api } from "$lib/api/client";
+import { copilot } from "#lib/stores/copilot.svelte.js";
+import { copilotBridge } from "#lib/stores/copilot-bridge.svelte.js";
+import { brandSettings } from "#lib/stores/index.js";
+import { api } from "#lib/api/client.js";
 import { projectBatchState } from "./context";
 import { streamFrames } from "./streaming";
 import { executeToolCall, type ConfirmationRequest, type ExecutorContext } from "./executor";

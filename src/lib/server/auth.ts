@@ -14,8 +14,8 @@ interface AuthEnv {
 
 /**
  * Per-request Better Auth instance. MUST be a factory — Cloudflare Workers
- * supply the D1 binding per request via `event.platform.env.DB`, so a
- * module-scope singleton would leak the wrong db across requests.
+ * supply the D1 binding per request via `env.DB` from `cloudflare:workers`, so
+ * a module-scope singleton would leak the wrong db across requests.
  *
  * Drizzle adapter uses `usePlural: true`; schema column names MUST be
  * snake_case (silent auth failures otherwise).
@@ -107,7 +107,7 @@ export function createAuth(d1: D1Database, env: AuthEnv) {
         },
 
         // Must include every host that can issue OAuth callbacks; mirrors
-        // CSRF list in svelte.config.js.
+        // the CSRF trustedOrigins in vite.config.ts.
         trustedOrigins: ["http://localhost:5173", "http://localhost:8787", "https://order-processor.dropoutstudio.co"]
     });
 }

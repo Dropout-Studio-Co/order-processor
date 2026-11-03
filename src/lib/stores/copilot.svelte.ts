@@ -12,8 +12,8 @@
  * the snapshot, which also reverts any manual edits made since (intentional —
  * see CLAUDE.md warning #18). Bounded by MAX_UNDO to cap memory.
  */
-import { titleFromMessage } from "$lib/ai/prompts";
-import { MAX_IMAGES } from "$lib/ai/image-limits";
+import { titleFromMessage } from "#lib/ai/prompts.js";
+import { MAX_IMAGES } from "#lib/ai/image-limits.js";
 import type {
     AiUndoEntry,
     Conversation,
@@ -23,7 +23,7 @@ import type {
     PendingConfirmation,
     PersistedConversationSummary,
     PersistedMessage
-} from "$lib/ai/types";
+} from "#lib/ai/types.js";
 
 const MAX_UNDO = 25;
 

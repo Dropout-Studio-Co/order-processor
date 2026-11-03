@@ -7,11 +7,11 @@
      * Cmd+Z; reverting also rolls back any manual edits made since. Read-only tools
      * have no `undoId`, so `canUndo` hides the button for them.
      */
-    import type { CopilotToolCall, ToolName } from "$lib/ai/types";
-    import { TOOL_LABELS } from "$lib/ai/tools-catalog";
-    import { undoAction } from "$lib/ai/chat-client";
+    import type { CopilotToolCall, ToolName } from "#lib/ai/types.js";
+    import { TOOL_LABELS } from "#lib/ai/tools-catalog.js";
+    import { undoAction } from "#lib/ai/chat-client.js";
     import { CheckCircle2, CircleX, Loader2, ShieldAlert, Undo2 } from "@lucide/svelte";
-    import { cn } from "$lib/utils";
+    import { cn } from "#lib/utils/index.js";
     import CopilotAnomalyWarning from "./copilot-anomaly-warning.svelte";
 
     let { call }: { call: CopilotToolCall } = $props();

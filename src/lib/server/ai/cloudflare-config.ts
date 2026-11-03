@@ -10,8 +10,8 @@
 
 import { eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { userSettings } from "$lib/server/schema";
-import { deriveTokenKey, decryptToken } from "$lib/server/crypto";
+import { userSettings } from "#lib/server/schema.js";
+import { deriveTokenKey, decryptToken } from "#lib/server/crypto.js";
 import { DEFAULT_MODEL, type CloudflareCreds } from "./run-rest";
 
 /** Raised by the chat gate when a user has not connected their Cloudflare account. */

@@ -1,5 +1,5 @@
 <!-- "Generating response" placeholder shown while a turn streams. The bars animate
-     via the `chat-gen-bar*` keyframes in $lib/styles/chat-animations.css (CSS-driven,
+     via the `chat-gen-bar*` keyframes in #lib/styles/chat-animations.css (CSS-driven,
      not GSAP), so this component holds no motion logic of its own. -->
 <div class="mb-3 flex justify-start" role="status" aria-label="Generating response">
     <div class="chat-message-enter">

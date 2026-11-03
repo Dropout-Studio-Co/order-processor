@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { isShopifyExport } from "$lib/services/data-processing";
+import { isShopifyExport } from "#lib/services/data-processing.js";
 import { parseCSV } from "./csv";
 
 /**

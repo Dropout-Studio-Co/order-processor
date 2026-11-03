@@ -6,7 +6,7 @@
  *   never cancel each other (same key resets the timer).
  */
 
-import type { SaveState } from "$lib/types";
+import type { SaveState } from "#lib/types/index.js";
 
 type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 

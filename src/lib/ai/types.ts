@@ -4,9 +4,9 @@
  * `executor.ts` against editor `$state`. `Frame` is the SSE wire protocol;
  * everything else here is client-side state.
  */
-import type { SteadFastOrder } from "$lib/types";
-import type { CellWarning, WarningCode } from "$lib/utils";
-import type { BatchDefaults, CellColumn } from "$lib/components/features/output-editor/columns";
+import type { SteadFastOrder } from "#lib/types/index.js";
+import type { CellWarning, WarningCode } from "#lib/utils/index.js";
+import type { BatchDefaults, CellColumn } from "#lib/components/features/output-editor/columns.js";
 
 /* ── Tool catalog ─────────────────────────────────────────────────────────── */
 

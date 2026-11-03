@@ -1,9 +1,10 @@
+import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
-import { brandSettings } from "$lib/server/schema";
-import { listConversations } from "$lib/server/repositories/ai-conversations";
-import type { BrandSettingsState } from "$lib/types";
-import type { PersistedConversationSummary } from "$lib/ai/types";
+import { brandSettings } from "#lib/server/schema.js";
+import { listConversations } from "#lib/server/repositories/ai-conversations.js";
+import type { BrandSettingsState } from "#lib/types/index.js";
+import type { PersistedConversationSummary } from "#lib/ai/types.js";
 import type { PageServerLoad } from "./$types";
 
 // Auth is OPTIONAL: logged-out visitors get the full app (settings persist to
@@ -12,7 +13,7 @@ import type { PageServerLoad } from "./$types";
 // anonymous visitors get empty defaults and hydrate from localStorage on mount.
 // When DB is absent (e.g. `bun run dev` without wrangler bindings) we degrade to
 // empty defaults rather than failing the page.
-export const load: PageServerLoad = async ({ locals, platform }) => {
+export const load: PageServerLoad = async ({ locals }) => {
     let settings: BrandSettingsState = {
         contactName: null,
         contactPhone: null,
@@ -21,8 +22,8 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     };
     let conversations: PersistedConversationSummary[] = [];
 
-    if (locals.user && platform?.env?.DB) {
-        const db = drizzle(platform.env.DB);
+    if (locals.user && env.DB) {
+        const db = drizzle(env.DB);
         const row = await db.select().from(brandSettings).where(eq(brandSettings.userId, locals.user.id)).get();
         if (row) {
             settings = {

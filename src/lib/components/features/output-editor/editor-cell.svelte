@@ -1,7 +1,7 @@
 <script lang="ts">
     import { scale } from "svelte/transition";
-    import { cn } from "$lib/utils";
-    import { motionDuration } from "$lib/motion";
+    import { cn } from "#lib/utils/index.js";
+    import { motionDuration } from "#lib/motion/index.js";
     import type { CellColumn, ColumnInputMode } from "./columns";
 
     export type CellNavigationDirection = "up" | "down" | "left" | "right" | "next" | "previous";

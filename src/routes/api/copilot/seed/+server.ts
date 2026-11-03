@@ -1,7 +1,8 @@
-import { error, json } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
+import { env } from "cloudflare:workers";
 import type { RequestHandler } from "./$types";
-import { KNOWLEDGE_CORPUS } from "$lib/ai/knowledge";
-import { embedDocuments } from "$lib/ai/embeddings";
+import { KNOWLEDGE_CORPUS } from "#lib/ai/knowledge.js";
+import { embedDocuments } from "#lib/ai/embeddings.js";
 
 /**
  * Embeds the full KNOWLEDGE_CORPUS with qwen3 and upserts it into Vectorize for
@@ -11,14 +12,13 @@ import { embedDocuments } from "$lib/ai/embeddings";
  * mismatch throw below guards against silently seeding misaligned id↔embedding
  * pairs if the embed call returns fewer rows than the corpus.
  */
-export const POST: RequestHandler = async ({ platform, request }) => {
-    const env = platform?.env;
+export const POST: RequestHandler = async ({ request }) => {
     if (!env?.AI || !env.VECTORIZE) {
-        error(503, { message: "AI or Vectorize binding unavailable" });
+        error(503, "AI or Vectorize binding unavailable");
     }
     const secret = env.SEED_SECRET;
     if (!secret || request.headers.get("x-seed-secret") !== secret) {
-        error(401, { message: "Unauthorized" });
+        error(401, "Unauthorized");
     }
 
     const texts = KNOWLEDGE_CORPUS.map((chunk) => chunk.text);
@@ -36,5 +36,5 @@ export const POST: RequestHandler = async ({ platform, request }) => {
     });
     await env.VECTORIZE.upsert(records);
 
-    return json({ seeded: records.length });
+    return Response.json({ seeded: records.length });
 };

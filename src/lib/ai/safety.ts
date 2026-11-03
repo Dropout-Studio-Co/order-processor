@@ -4,8 +4,8 @@
  *   - executor.ts confirmation panels (warnings before a mutation applies)
  * Thresholds are conservative defaults — tune against real batch distributions.
  */
-import type { SteadFastOrder } from "$lib/types";
-import { normalizePhoneNumber } from "$lib/utils";
+import type { SteadFastOrder } from "#lib/types/index.js";
+import { normalizePhoneNumber } from "#lib/utils/index.js";
 import type { AnomalyResult } from "./types";
 
 const AMOUNT_OUTLIER_MIN_SAMPLES = 4;

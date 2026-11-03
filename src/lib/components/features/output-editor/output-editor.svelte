@@ -11,15 +11,21 @@
 <script lang="ts">
     import { untrack } from "svelte";
     import { SvelteSet, SvelteMap } from "svelte/reactivity";
-    import type { SteadFastOrder } from "$lib/types";
-    import { buildWorkbook, writeWorkbook, normalizePhoneNumber, validateRow, type CellWarning } from "$lib/utils";
+    import type { SteadFastOrder } from "#lib/types/index.js";
+    import {
+        buildWorkbook,
+        writeWorkbook,
+        normalizePhoneNumber,
+        validateRow,
+        type CellWarning
+    } from "#lib/utils/index.js";
     import BatchDefaultsStrip from "./batch-defaults-strip.svelte";
     import EditorGrid from "./editor-grid.svelte";
     import ActionBar from "./action-bar.svelte";
-    import * as AlertDialog from "$lib/components/ui/alert-dialog";
+    import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
     import { BATCH_CONSTANT_COLUMNS, type BatchDefaults, type CellColumn } from "./columns";
-    import { copilotBridge } from "$lib/stores/copilot-bridge.svelte";
-    import type { CellEdit, EditorController, EditorSnapshot } from "$lib/ai/types";
+    import { copilotBridge } from "#lib/stores/copilot-bridge.svelte.js";
+    import type { CellEdit, EditorController, EditorSnapshot } from "#lib/ai/types.js";
 
     interface Props {
         initialRows: SteadFastOrder[];

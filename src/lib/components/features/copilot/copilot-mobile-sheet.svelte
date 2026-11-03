@@ -10,7 +10,7 @@
      */
     import { fade, fly } from "svelte/transition";
     import { tick } from "svelte";
-    import { copilot } from "$lib/stores/copilot.svelte";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
     import CopilotSidebar from "./copilot-sidebar.svelte";
 
     let panel = $state<HTMLDivElement | null>(null);

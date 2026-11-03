@@ -5,7 +5,7 @@
     `sleek border-hair bg-card` treatment so the corner reads consistently whether signed in or out.
 -->
 <script lang="ts">
-    import { cn } from "$lib/utils";
+    import { cn } from "#lib/utils/index.js";
     import { CloudUpload } from "@lucide/svelte";
 </script>
 

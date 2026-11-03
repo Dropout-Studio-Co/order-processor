@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { Plus } from "@lucide/svelte";
-    import type { SteadFastOrder } from "$lib/types";
-    import { Table } from "$lib/components/ui";
-    import { cn } from "$lib/utils";
+    import type { SteadFastOrder } from "#lib/types/index.js";
+    import { Table } from "#lib/components/ui/index.js";
+    import { cn } from "#lib/utils/index.js";
     import EditorRow from "./editor-row.svelte";
     import type { CellNavigationDirection } from "./editor-cell.svelte";
     import { PER_ROW_COLUMNS, STEADFAST_COLUMNS, type CellColumn, type BatchDefaults } from "./columns";

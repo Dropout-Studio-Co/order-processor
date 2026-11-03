@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { enhance } from "$app/forms";
-    import { invalidateAll } from "$app/navigation";
-    import { authClient } from "$lib/auth-client";
+    import { refreshAll } from "$app/navigation";
+    import { authClient } from "#lib/auth-client.js";
     import { ArrowLeft, Cloud, RefreshCw, Check, Trash2, Fingerprint } from "@lucide/svelte";
     import {
         Heading,
@@ -18,8 +18,8 @@
         SettingsSection,
         SettingsRow,
         SettingsActions
-    } from "$lib/ds";
-    import { isPlatformAuthenticatorAvailable, detectPlatform, biometricLabel } from "$lib/ds/adapters";
+    } from "#lib/ds/index.js";
+    import { isPlatformAuthenticatorAvailable, detectPlatform, biometricLabel } from "#lib/ds/adapters/index.js";
     import type { PageData, ActionData } from "./$types";
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -106,7 +106,7 @@
 
     // Seed the editable fields from the loaded server row, but ONLY when the
     // persisted values actually change — not on every `data` replacement. A
-    // "Refresh models" invalidateAll re-runs load without touching accountId/model,
+    // "Refresh models" refreshAll re-runs load without touching accountId/model,
     // so reseeding unconditionally would clobber the user's unsaved edits; a save
     // or disconnect genuinely changes them and still resyncs.
     let lastAccountId = $state<string | undefined>(undefined);
@@ -151,7 +151,7 @@
         refreshing = true;
         try {
             await fetch("/api/cf/models?refresh=1");
-            await invalidateAll();
+            await refreshAll();
         } finally {
             refreshing = false;
         }

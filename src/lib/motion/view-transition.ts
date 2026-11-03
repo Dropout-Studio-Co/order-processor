@@ -1,5 +1,5 @@
-import type { OnNavigate } from "@sveltejs/kit";
-import { prefersReducedMotion } from "$lib/motion/reduced-motion.svelte";
+import type { OnNavigate } from "$app/navigation";
+import { prefersReducedMotion } from "#lib/motion/reduced-motion.svelte.js";
 
 type NavigateCallback = Parameters<typeof import("$app/navigation").onNavigate>[0];
 type NavigationArg = OnNavigate;

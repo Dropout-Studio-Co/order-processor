@@ -6,9 +6,9 @@
     so an in-progress PATCH is not lost.
 -->
 <script lang="ts">
-    import { brandSettings } from "$lib/stores";
-    import { Input } from "$lib/components/ui/input";
-    import { Eyebrow, labelBase } from "$lib/ds";
+    import { brandSettings } from "#lib/stores/index.js";
+    import { Input } from "#lib/components/ui/input/index.js";
+    import { Eyebrow, labelBase } from "#lib/ds/index.js";
     import { Loader2, AlertCircle } from "@lucide/svelte";
 
     interface Props {

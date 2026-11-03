@@ -6,7 +6,7 @@
      * Mobile (<lg) uses copilot-mobile-fab + sheet instead, so the two launchers
      * never appear together.
      */
-    import { copilot } from "$lib/stores/copilot.svelte";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
     import CopilotLauncherIcon from "./copilot-launcher-icon.svelte";
 </script>
 

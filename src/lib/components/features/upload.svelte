@@ -1,5 +1,5 @@
 <script lang="ts">
-    import uploadGif from "$lib/assets/upload.gif";
+    import uploadGif from "#lib/assets/upload.gif";
 
     interface Props {
         disabled?: boolean;

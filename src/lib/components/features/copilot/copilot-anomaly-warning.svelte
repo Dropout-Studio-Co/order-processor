@@ -4,7 +4,7 @@
      * in the confirm dialog (pre-apply). `anomaly.rowIndex` is 0-based; the +1 in
      * markup matches the 1-based row numbers the user sees in the editor grid.
      */
-    import type { AnomalyResult } from "$lib/ai/types";
+    import type { AnomalyResult } from "#lib/ai/types.js";
     import { AlertTriangle } from "@lucide/svelte";
 
     let { anomalies }: { anomalies: AnomalyResult[] } = $props();
