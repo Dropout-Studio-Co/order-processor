@@ -107,7 +107,7 @@ export function createAuth(d1: D1Database, env: AuthEnv) {
         },
 
         // Must include every host that can issue OAuth callbacks; mirrors
-        // CSRF list in svelte.config.js.
+        // the CSRF trustedOrigins in vite.config.ts.
         trustedOrigins: ["http://localhost:5173", "http://localhost:8787", "https://order-processor.dropoutstudio.co"]
     });
 }

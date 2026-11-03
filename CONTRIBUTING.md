@@ -134,14 +134,13 @@ The project follows the standard SvelteKit layout:
 │   │   ├── components/  # UI components (ui/ holds auto-generated shadcn-svelte primitives)
 │   │   └── ...          # Domain libraries, utilities, types, config
 │   ├── app.css          # Tailwind v4 CSS-first config + global styles
-│   ├── app.d.ts         # App.Locals / App.Platform / App.PageData / App.Error types
+│   ├── app.d.ts         # App.Locals / Cloudflare.Env / App.PageData / App.Error types
 │   ├── app.html         # HTML shell
 │   ├── hooks.server.ts  # Auth session middleware + security headers
 │   └── hooks.client.ts  # Client-side error handling
 ├── static/              # Static assets
 ├── wrangler.jsonc       # Cloudflare Workers config + bindings
-├── svelte.config.js     # SvelteKit config + path aliases
-├── vite.config.ts       # Vite config
+├── vite.config.ts       # Vite config + SvelteKit plugin options (adapter, CSRF, preprocess)
 ├── drizzle.config.ts    # Drizzle ORM config
 ├── tsconfig.json        # TypeScript strict config
 └── eslint.config.js     # ESLint flat config
