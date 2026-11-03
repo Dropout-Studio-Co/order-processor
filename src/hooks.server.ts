@@ -172,7 +172,7 @@ export const handleError: HandleServerError = ({ kind, error, event }) => {
                   message: kind === "validation" ? "Bad Request" : "Internal Error",
                   cause: error
               };
-    const expected = (kind === "app" || kind === "framework") && normalized.status < 500;
+    const expected = kind === "app" || (kind === "framework" && normalized.status < 500);
     const label = expected ? `${kind} error` : "Unhandled error";
     const log = expected ? console.warn : console.error;
 

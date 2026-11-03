@@ -15,7 +15,7 @@ export const handleError: HandleClientError = ({ kind, error }) => {
                   message: "Internal Error",
                   cause: error
               };
-    const expected = (kind === "app" || kind === "framework") && normalized.status < 500;
+    const expected = kind === "app" || (kind === "framework" && normalized.status < 500);
     const label = expected ? `${kind} error` : "Unhandled error";
     const log = expected ? console.warn : console.error;
 
