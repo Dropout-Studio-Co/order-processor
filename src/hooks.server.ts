@@ -160,8 +160,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 // errorId is returned to the client and logged here so user reports map back to a Cloudflare log entry.
-// SvelteKit 3 routes app, framework, validation and unknown errors through this hook, so the
-// status/message are read off the error for app/framework kinds and genericised for the rest.
+// SvelteKit 3 routes expected app errors through this hook too, so only unexpected kinds and 5xx
+// responses are logged at error level; a deliberate 401/404 is a warning, not an incident.
 export const handleError: HandleServerError = ({ kind, error, event }) => {
     const errorId = crypto.randomUUID();
     const normalized =
@@ -172,8 +172,11 @@ export const handleError: HandleServerError = ({ kind, error, event }) => {
                   message: kind === "validation" ? "Bad Request" : "Internal Error",
                   cause: error
               };
+    const expected = (kind === "app" || kind === "framework") && normalized.status < 500;
+    const label = expected ? `${kind} error` : "Unhandled error";
+    const log = expected ? console.warn : console.error;
 
-    console.error(`[${errorId}] Unhandled error:`, {
+    log(`[${errorId}] ${label}:`, {
         kind,
         status: normalized.status,
         message: normalized.message,
