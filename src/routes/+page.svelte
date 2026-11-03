@@ -1,10 +1,10 @@
 <script lang="ts">
     import { untrack, onMount } from "svelte";
-    import { courierService, brandSettings } from "$lib/stores";
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import { cn } from "$lib/utils";
-    import { Heading, OrderProcessor, Navbar, User, SignInButton, SteadFastSettings } from "$lib/components";
-    import { reveal } from "$lib/motion";
+    import { courierService, brandSettings } from "#lib/stores/index.js";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import { cn } from "#lib/utils/index.js";
+    import { Heading, OrderProcessor, Navbar, User, SignInButton, SteadFastSettings } from "#lib/components/index.js";
+    import { reveal } from "#lib/motion/index.js";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();

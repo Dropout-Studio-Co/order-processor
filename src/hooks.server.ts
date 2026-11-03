@@ -1,10 +1,11 @@
-import type { Handle, HandleServerError } from "@sveltejs/kit";
+import type { Handle, HandleServerError } from "@sveltejs/kit/hooks";
 import { svelteKitHandler } from "better-auth/svelte-kit";
-import { building } from "$app/environment";
+import { env } from "cloudflare:workers";
+import { building } from "$app/env";
 import { drizzle } from "drizzle-orm/d1";
-import { createAuth } from "$lib/server/auth";
-import { users } from "$lib/server/schema";
-import { getCurrentUser } from "$lib/hooks";
+import { createAuth } from "#lib/server/auth.js";
+import { users } from "#lib/server/schema.js";
+import { getCurrentUser } from "#lib/hooks/index.js";
 
 // 'unsafe-inline' is REQUIRED for SvelteKit hydration scripts and Tailwind
 // scoped styles — do not tighten without testing. lh3.googleusercontent.com
@@ -60,10 +61,10 @@ export const handle: Handle = async ({ event, resolve }) => {
         return resolve(event);
     }
 
-    const db = event.platform?.env?.DB;
+    const db = env.DB;
 
     if (!db) {
-        // Happens in `bun run dev` (no wrangler bindings) or during initial setup.
+        // Happens when the D1 binding is unavailable (a misconfigured deployment).
         console.warn("D1 database not available - auth disabled");
         event.locals.user = null;
         event.locals.session = null;
@@ -82,7 +83,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // Synthesizes a session and upserts the e2e-test-user row so FK-bound app data has a real owner.
     // MUST NEVER be enabled in production — it grants full unauthenticated access.
     const isLocalDev = event.url.hostname === "localhost" || event.url.hostname === "127.0.0.1";
-    if (isLocalDev && event.platform?.env?.E2E_BYPASS_AUTH === "true") {
+    if (isLocalDev && env.E2E_BYPASS_AUTH === "true") {
         const now = new Date();
         const userId = "e2e-test-user";
         const dz = drizzle(db);
@@ -121,18 +122,18 @@ export const handle: Handle = async ({ event, resolve }) => {
         return applySecurityHeaders(await resolve(event));
     }
 
-    const env = {
-        BETTER_AUTH_SECRET: event.platform?.env?.BETTER_AUTH_SECRET ?? "",
-        BETTER_AUTH_URL: event.platform?.env?.BETTER_AUTH_URL ?? "http://localhost:5173",
-        GOOGLE_CLIENT_ID: event.platform?.env?.GOOGLE_CLIENT_ID ?? "",
-        GOOGLE_CLIENT_SECRET: event.platform?.env?.GOOGLE_CLIENT_SECRET ?? ""
+    const authEnv = {
+        BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET ?? "",
+        BETTER_AUTH_URL: env.BETTER_AUTH_URL ?? "http://localhost:5173",
+        GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID ?? "",
+        GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET ?? ""
     };
 
-    if (!env.BETTER_AUTH_SECRET) {
+    if (!authEnv.BETTER_AUTH_SECRET) {
         console.error("[auth] BETTER_AUTH_SECRET is not set — auth will fail in production");
     }
 
-    const auth = createAuth(db, env);
+    const auth = createAuth(db, authEnv);
 
     let session;
     try {
@@ -159,19 +160,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 // errorId is returned to the client and logged here so user reports map back to a Cloudflare log entry.
-export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+// SvelteKit 3 routes app, framework, validation and unknown errors through this hook, so the
+// status/message are read off the error for app/framework kinds and genericised for the rest.
+export const handleError: HandleServerError = ({ kind, error, event }) => {
     const errorId = crypto.randomUUID();
+    const normalized =
+        kind === "app" || kind === "framework"
+            ? { status: error.status, message: error.message, cause: error }
+            : { status: 500, message: "Internal Error", cause: error };
 
     console.error(`[${errorId}] Unhandled error:`, {
-        status,
-        message,
+        kind,
+        status: normalized.status,
+        message: normalized.message,
         url: event.url.pathname,
         method: event.request.method,
-        error: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error
+        error:
+            normalized.cause instanceof Error
+                ? { name: normalized.cause.name, message: normalized.cause.message, stack: normalized.cause.stack }
+                : normalized.cause
     });
 
     return {
-        message: status >= 500 ? "An unexpected error occurred" : message,
+        message: normalized.status >= 500 ? "An unexpected error occurred" : normalized.message,
         errorId
     };
 };

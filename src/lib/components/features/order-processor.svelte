@@ -8,18 +8,18 @@
     bindable so the parent layout can switch stacked ↔ side-by-side.
 -->
 <script lang="ts">
-    import type { SteadFastOrder } from "$lib/types";
-    import { processOrders } from "$lib/services";
-    import { generateFileName } from "$lib/constants";
-    import { brandSettings, hasMerchantId } from "$lib/stores";
-    import { Courier } from "$lib/types";
-    import type { CurrentUser } from "$lib/types";
-    import { cn, parseCSV, normalizePhoneNumber } from "$lib/utils";
-    import { LoadingSpinner } from "$lib/components";
+    import type { SteadFastOrder } from "#lib/types/index.js";
+    import { processOrders } from "#lib/services/index.js";
+    import { generateFileName } from "#lib/constants/index.js";
+    import { brandSettings, hasMerchantId } from "#lib/stores/index.js";
+    import { Courier } from "#lib/types/index.js";
+    import type { CurrentUser } from "#lib/types/index.js";
+    import { cn, parseCSV, normalizePhoneNumber } from "#lib/utils/index.js";
+    import { LoadingSpinner } from "#lib/components/index.js";
     import { OutputEditor, type BatchDefaults } from "./output-editor";
     import Upload from "./upload.svelte";
-    import { copilotBridge } from "$lib/stores/copilot-bridge.svelte";
-    import type { CsvMapping, IngestionController } from "$lib/ai/types";
+    import { copilotBridge } from "#lib/stores/copilot-bridge.svelte.js";
+    import type { CsvMapping, IngestionController } from "#lib/ai/types.js";
 
     interface Props {
         currentUser: CurrentUser | null;
@@ -27,7 +27,6 @@
         editorOpen?: boolean;
     }
 
-    // eslint-disable-next-line no-useless-assignment -- $bindable's default is a runtime initializer, not a useless assignment.
     let { currentUser, selectedCourier, editorOpen = $bindable(false) }: Props = $props();
 
     let zoneHover = $state(false);

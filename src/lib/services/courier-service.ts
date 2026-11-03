@@ -1,5 +1,5 @@
-import type { SteadFastOrder, UserInfo } from "$lib/types";
-import { normalizePhoneNumber } from "$lib/utils";
+import type { SteadFastOrder, UserInfo } from "#lib/types/index.js";
+import { normalizePhoneNumber } from "#lib/utils/index.js";
 import { prepareSteadFastOrderData, prepareShopifySteadFastOrderData, isShopifyExport } from "./data-processing";
 
 /**

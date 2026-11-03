@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { Eyebrow } from "$lib/ds";
-    import { Input } from "$lib/components/ui/input";
-    import { cn } from "$lib/utils";
+    import { Eyebrow } from "#lib/ds/index.js";
+    import { Input } from "#lib/components/ui/input/index.js";
+    import { cn } from "#lib/utils/index.js";
     import { BATCH_CONSTANT_COLUMNS, type BatchDefaults } from "./columns";
 
     interface Props {

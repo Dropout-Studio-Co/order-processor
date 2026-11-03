@@ -1,8 +1,8 @@
 import { tick } from "svelte";
-import { getGsap } from "$lib/motion/gsap";
-import { prefersReducedMotion } from "$lib/motion/reduced-motion.svelte";
-import { DURATION, DURATION_MS, EASE, STAGGER, DISTANCE } from "$lib/motion/tokens";
-import type { DurationToken, DistanceToken, StaggerToken } from "$lib/motion/tokens";
+import { getGsap } from "#lib/motion/gsap.js";
+import { prefersReducedMotion } from "#lib/motion/reduced-motion.svelte.js";
+import { DURATION, DURATION_MS, EASE, STAGGER, DISTANCE } from "#lib/motion/tokens.js";
+import type { DurationToken, DistanceToken, StaggerToken } from "#lib/motion/tokens.js";
 
 export interface StaggerOptions {
     distance?: DistanceToken;

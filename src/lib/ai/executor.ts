@@ -13,10 +13,10 @@
  * Editor `$derived` validation re-runs automatically when `rows` mutates.
  * IMPORTANT: undoStack is SEPARATE from the editor's native Cmd+Z (undoEntry).
  */
-import { copilot } from "$lib/stores/copilot.svelte";
-import { copilotBridge } from "$lib/stores/copilot-bridge.svelte";
-import { brandSettings } from "$lib/stores";
-import { normalizePhoneNumber } from "$lib/utils";
+import { copilot } from "#lib/stores/copilot.svelte.js";
+import { copilotBridge } from "#lib/stores/copilot-bridge.svelte.js";
+import { brandSettings } from "#lib/stores/index.js";
+import { normalizePhoneNumber } from "#lib/utils/index.js";
 import { detectAnomalies } from "./safety";
 import { argSchemas, isKnownToolName, type ArgsOf } from "./schemas";
 import { READ_ONLY_TOOLS } from "./types";
@@ -29,8 +29,8 @@ import type {
     EditorController,
     ParsedToolCall
 } from "./types";
-import type { SteadFastOrder } from "$lib/types";
-import type { BatchDefaults, CellColumn } from "$lib/components/features/output-editor/columns";
+import type { SteadFastOrder } from "#lib/types/index.js";
+import type { BatchDefaults, CellColumn } from "#lib/components/features/output-editor/columns.js";
 
 export interface ConfirmationRequest {
     toolCallId: string;

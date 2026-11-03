@@ -19,7 +19,12 @@
  * model.
  */
 import type { Frame, ParsedToolCall, ToolCatalogEntry, RawChatResult } from "./types";
-import { runChatViaRest, CfInferenceError, type CloudflareCreds, type ChatRestResult } from "$lib/server/ai/run-rest";
+import {
+    runChatViaRest,
+    CfInferenceError,
+    type CloudflareCreds,
+    type ChatRestResult
+} from "#lib/server/ai/run-rest.js";
 
 export type { RawChatResult } from "./types";
 

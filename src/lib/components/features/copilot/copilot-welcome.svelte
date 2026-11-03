@@ -7,7 +7,7 @@
      * capabilities prompt), keeping the first interaction safe.
      */
     import { FileSpreadsheet, Truck, AlertTriangle, HelpCircle } from "@lucide/svelte";
-    import { Heading } from "$lib/ds";
+    import { Heading } from "#lib/ds/index.js";
 
     let { onSuggestionClick }: { onSuggestionClick: (text: string) => void } = $props();
 

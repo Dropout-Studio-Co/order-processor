@@ -5,7 +5,7 @@
      * `copilot.mobileOpen` so it never sits under the open sheet; opening flips the
      * same store flag the sheet reads.
      */
-    import { copilot } from "$lib/stores/copilot.svelte";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
     import CopilotLauncherIcon from "./copilot-launcher-icon.svelte";
 </script>
 

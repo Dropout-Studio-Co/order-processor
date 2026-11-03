@@ -10,8 +10,8 @@
      * exported `addFile`, reusing its validation/re-encode.
      */
     import { ArrowUp, ImagePlus } from "@lucide/svelte";
-    import { cn } from "$lib/utils";
-    import { copilot } from "$lib/stores/copilot.svelte";
+    import { cn } from "#lib/utils/index.js";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
     import CopilotImageUpload from "./copilot-image-upload.svelte";
 
     let {

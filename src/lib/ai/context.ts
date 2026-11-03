@@ -3,7 +3,7 @@
  * stateless chat endpoint each turn. Row listing capped at MAX_LISTED_ROWS to
  * stay under the model context limit; the model uses getRows() to inspect more.
  */
-import type { BrandSettingsState } from "$lib/types";
+import type { BrandSettingsState } from "#lib/types/index.js";
 import type { EditorController, RawCsv } from "./types";
 
 const MAX_LISTED_ROWS = 60;

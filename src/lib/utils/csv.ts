@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import type { CSVParseResult } from "$lib/types";
+import type { CSVParseResult } from "#lib/types/index.js";
 
 // Parses with `header: false` (PapaParse default), so `data` is a raw 2D array
 // including the header row. Downstream prep (data-processing.ts) relies on this

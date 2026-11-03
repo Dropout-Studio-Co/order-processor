@@ -5,25 +5,26 @@
  * - Stateless: client ships full conversation + pre-rendered CURRENT STATE every turn.
  * - Server only DECIDES tool calls; executor.ts in the browser RUNS them.
  * - Validates tool args against argSchemas; one corrective retry per turn.
- * - Frames out: text → tool_call(s) → end | error (see Frame in $lib/ai/types).
+ * - Frames out: text → tool_call(s) → end | error (see Frame in #lib/ai/types).
  */
-import { error, json } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
+import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import type { RequestHandler } from "./$types";
-import { runChatFrames, type RunChatEnv } from "$lib/ai/client";
-import { sseStream } from "$lib/ai/streaming";
-import { buildSystemContext, FEW_SHOTS, titleFromMessage } from "$lib/ai/prompts";
-import { TOOLS_CATALOG } from "$lib/ai/tools-catalog";
-import { argSchemas, isKnownToolName } from "$lib/ai/schemas";
-import { retrieveAppKnowledge, formatKnowledge } from "$lib/ai/rag";
-import { salvageTextToolCalls } from "$lib/ai/salvage";
-import { MAX_IMAGE_DATA_URL_CHARS, MAX_IMAGES } from "$lib/ai/image-limits";
-import { loadCloudflareConfig, resolveCloudflareCreds } from "$lib/server/ai/cloudflare-config";
-import { createConversation, getConversation, touchUpdatedAt } from "$lib/server/repositories/ai-conversations";
-import { appendMessage } from "$lib/server/repositories/ai-messages";
-import { checkChatRateLimit } from "$lib/server/rate-limit";
-import type { ParsedToolCall } from "$lib/ai/types";
+import { runChatFrames, type RunChatEnv } from "#lib/ai/client.js";
+import { sseStream } from "#lib/ai/streaming.js";
+import { buildSystemContext, FEW_SHOTS, titleFromMessage } from "#lib/ai/prompts.js";
+import { TOOLS_CATALOG } from "#lib/ai/tools-catalog.js";
+import { argSchemas, isKnownToolName } from "#lib/ai/schemas.js";
+import { retrieveAppKnowledge, formatKnowledge } from "#lib/ai/rag.js";
+import { salvageTextToolCalls } from "#lib/ai/salvage.js";
+import { MAX_IMAGE_DATA_URL_CHARS, MAX_IMAGES } from "#lib/ai/image-limits.js";
+import { loadCloudflareConfig, resolveCloudflareCreds } from "#lib/server/ai/cloudflare-config.js";
+import { createConversation, getConversation, touchUpdatedAt } from "#lib/server/repositories/ai-conversations.js";
+import { appendMessage } from "#lib/server/repositories/ai-messages.js";
+import { checkChatRateLimit } from "#lib/server/rate-limit.js";
+import type { ParsedToolCall } from "#lib/ai/types.js";
 
 /**
  * Vision model for image-bearing turns — mistral-small-3.1 reads the screenshot AND
@@ -145,17 +146,17 @@ const stableConversationId = async (seed: string): Promise<string> => {
         .join("");
 };
 
-export const POST: RequestHandler = async ({ locals, platform, request }) => {
+export const POST: RequestHandler = async ({ locals, request }) => {
     if (!locals.user) {
-        error(401, { message: "Not authenticated" });
+        error(401, "Not authenticated");
     }
-    if (!platform?.env?.AI) {
-        error(503, { message: "AI is not available in this environment." });
+    if (!env.AI) {
+        error(503, "AI is not available in this environment.");
     }
 
     // D1 handle reused for the per-user rate limit below and turn persistence
     // further down. Null when D1 is unbound (degraded mode) — both uses fail open.
-    const db = platform?.env?.DB ? drizzle(platform.env.DB) : null;
+    const db = env.DB ? drizzle(env.DB) : null;
     // Capture once: control-flow narrowing of `locals.user` (from the 401 guard
     // above) does not reach the deferred sseStream callback below.
     const userId = locals.user.id;
@@ -164,12 +165,12 @@ export const POST: RequestHandler = async ({ locals, platform, request }) => {
     try {
         parsed = bodySchema.parse(await request.json());
     } catch (err) {
-        error(400, { message: err instanceof Error ? err.message : "Invalid request body" });
+        error(400, err instanceof Error ? err.message : "Invalid request body");
     }
 
     const lastMessage = parsed.messages[parsed.messages.length - 1];
     if (!lastMessage || lastMessage.role !== "user") {
-        error(400, { message: "The conversation must end with a user message." });
+        error(400, "The conversation must end with a user message.");
     }
 
     let userMessage = lastMessage.content;
@@ -181,13 +182,13 @@ export const POST: RequestHandler = async ({ locals, platform, request }) => {
     // Copilot UI can render a "Connect your Cloudflare account" CTA instead of a
     // generic error. Gated BEFORE the rate limit so an unconnected user never
     // burns a rate-limit unit (matches day-zero / invoice-generator ordering).
-    const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+    const encryptionKey = env.TOKEN_ENCRYPTION_KEY;
     const resolved =
         db && encryptionKey
             ? await resolveCloudflareCreds(encryptionKey, await loadCloudflareConfig(db, userId)).catch(() => null)
             : null;
     if (!resolved) {
-        return json(
+        return Response.json(
             { error: "Connect your Cloudflare account in Settings to use the copilot.", connect: "/settings" },
             { status: 412 }
         );
@@ -197,13 +198,13 @@ export const POST: RequestHandler = async ({ locals, platform, request }) => {
     // corrective retry + RAG embedding). Reuses the rate_limits table; skipped
     // when D1 is unavailable. friendlyHttpError() maps the 429 to a banner.
     if (db && !(await checkChatRateLimit(db, userId))) {
-        error(429, { message: "You're sending messages too quickly. Please wait a moment and try again." });
+        error(429, "You're sending messages too quickly. Please wait a moment and try again.");
     }
 
-    if (platform?.env?.VECTORIZE) {
+    if (env.VECTORIZE) {
         try {
             const knowledge = formatKnowledge(
-                await retrieveAppKnowledge(platform.env.VECTORIZE, platform.env.AI, resolved.creds, lastMessage.content)
+                await retrieveAppKnowledge(env.VECTORIZE, env.AI, resolved.creds, lastMessage.content)
             );
             if (knowledge.length > 0) {
                 userMessage = `${userMessage}\n\nAPP KNOWLEDGE:\n${knowledge}`;

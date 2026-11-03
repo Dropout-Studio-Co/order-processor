@@ -10,11 +10,11 @@
         CopilotDesktopLauncher,
         CopilotMobileSheet,
         CopilotConfirmDialog
-    } from "$lib/components";
-    import { handleViewTransition, motionDuration } from "$lib/motion";
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import uploadGif from "$lib/assets/upload.gif";
-    import steadfastLogo from "$lib/assets/steadfast.png";
+    } from "#lib/components/index.js";
+    import { handleViewTransition, motionDuration } from "#lib/motion/index.js";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import uploadGif from "#lib/assets/upload.gif";
+    import steadfastLogo from "#lib/assets/steadfast.png";
 
     let { children } = $props();
 

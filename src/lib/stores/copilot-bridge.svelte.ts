@@ -8,7 +8,7 @@
  * `unregister*` is identity-checked so a fast editor remount (new CSV drop)
  * that registers a fresh controller is not clobbered by the old one's teardown.
  */
-import type { EditorController, IngestionController } from "$lib/ai/types";
+import type { EditorController, IngestionController } from "#lib/ai/types.js";
 
 const createBridge = () => {
     let editor = $state<EditorController | null>(null);

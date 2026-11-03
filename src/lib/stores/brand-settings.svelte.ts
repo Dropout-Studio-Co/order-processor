@@ -11,9 +11,9 @@
  * field never blocks another; the aggregate `saveState`/`saveError` getters
  * roll them up for the beforeunload guard.
  */
-import type { BrandSettingsState, BrandSettingsPatch, SaveState } from "$lib/types";
-import { api, debounceSync } from "$lib/api/client";
-import { readLocal, writeLocal, clearLocal } from "$lib/persistence/local";
+import type { BrandSettingsState, BrandSettingsPatch, SaveState } from "#lib/types/index.js";
+import { api, debounceSync } from "#lib/api/client.js";
+import { readLocal, writeLocal, clearLocal } from "#lib/persistence/local.js";
 
 const EMPTY: BrandSettingsState = {
     contactName: null,

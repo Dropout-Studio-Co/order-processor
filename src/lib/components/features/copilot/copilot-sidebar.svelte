@@ -12,9 +12,9 @@
      * same shell edge-to-edge; `onClose` is wired only when there is a chrome to
      * close (mobile sheet) and stays undefined for the docked desktop rail.
      */
-    import { copilot } from "$lib/stores/copilot.svelte";
-    import { sendMessage, createNewConversation } from "$lib/ai/chat-client";
-    import { cn } from "$lib/utils";
+    import { copilot } from "#lib/stores/copilot.svelte.js";
+    import { sendMessage, createNewConversation } from "#lib/ai/chat-client.js";
+    import { cn } from "#lib/utils/index.js";
     import { Cloud, ArrowRight } from "@lucide/svelte";
     import CopilotHeader from "./copilot-header.svelte";
     import CopilotWelcome from "./copilot-welcome.svelte";

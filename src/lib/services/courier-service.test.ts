@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { processOrders } from "./courier-service";
-import { parseCSV } from "$lib/utils/csv";
-import type { UserInfo } from "$lib/types";
+import { parseCSV } from "#lib/utils/csv.js";
+import type { UserInfo } from "#lib/types/index.js";
 
 const user: UserInfo = {
     name: "Dhaka Store",

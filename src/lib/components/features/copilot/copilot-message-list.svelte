@@ -7,7 +7,7 @@
      * short-circuits on it. The `<svelte:boundary>` isolates a markdown/render
      * fault to this panel so one bad message can't blank the whole rail.
      */
-    import type { CopilotMessage as CopilotMessageType } from "$lib/ai/types";
+    import type { CopilotMessage as CopilotMessageType } from "#lib/ai/types.js";
     import CopilotMessage from "./copilot-message.svelte";
     import CopilotTypingIndicator from "./copilot-typing-indicator.svelte";
 

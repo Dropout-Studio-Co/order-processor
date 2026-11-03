@@ -1,5 +1,5 @@
-import type { SteadFastOrder } from "$lib/types";
-import type { CellColumn } from "$lib/components/features/output-editor/columns";
+import type { SteadFastOrder } from "#lib/types/index.js";
+import type { CellColumn } from "#lib/components/features/output-editor/columns.js";
 import { normalizePhoneNumber } from "./phone";
 
 export type WarningCode = "empty" | "phone_format" | "amount_format";

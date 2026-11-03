@@ -1,4 +1,4 @@
-import type { CurrentUser } from "$lib/types";
+import type { CurrentUser } from "#lib/types/index.js";
 
 /**
  * Derive CurrentUser from an authenticated session user.

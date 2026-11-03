@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { SteadFastOrder } from "$lib/types";
+import type { SteadFastOrder } from "#lib/types/index.js";
 import { buildWorkbook } from "./excel";
 
 const order = (overrides: Partial<SteadFastOrder> = {}): SteadFastOrder => ({

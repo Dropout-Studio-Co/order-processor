@@ -5,7 +5,7 @@
  * to the SteadFast default when nothing has been persisted.
  */
 
-import { Courier } from "$lib/types";
+import { Courier } from "#lib/types/index.js";
 import { brandSettings } from "./brand-settings.svelte";
 
 const DEFAULT_COURIER: string = Courier.SteadFast;

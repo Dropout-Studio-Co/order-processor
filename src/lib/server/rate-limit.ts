@@ -14,7 +14,7 @@
  */
 import { eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { rateLimits } from "$lib/server/schema";
+import { rateLimits } from "#lib/server/schema.js";
 
 type Db = DrizzleD1Database<Record<string, never>>;
 

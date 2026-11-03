@@ -11,7 +11,7 @@
  * embeds the corpus with `env.AI`.)
  */
 import { EMBEDDING_MODEL } from "./embeddings";
-import { runEmbeddingViaRest, type CloudflareCreds } from "$lib/server/ai/run-rest";
+import { runEmbeddingViaRest, type CloudflareCreds } from "#lib/server/ai/run-rest.js";
 
 export interface RagChunk {
     id: string;

@@ -1,11 +1,16 @@
 import { fail, redirect } from "@sveltejs/kit";
+import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
-import { userSettings } from "$lib/server/schema";
-import { deriveTokenKey, encryptToken, decryptToken, maskToken } from "$lib/server/crypto";
-import { listChatModels, DEFAULT_MODEL, type CfModel } from "$lib/server/ai/run-rest";
-import { loadCloudflareConfig, resolveCloudflareCreds, isCloudflareConnected } from "$lib/server/ai/cloudflare-config";
-import { describeCloudflareError } from "$lib/server/ai/errors";
+import { userSettings } from "#lib/server/schema.js";
+import { deriveTokenKey, encryptToken, decryptToken, maskToken } from "#lib/server/crypto.js";
+import { listChatModels, DEFAULT_MODEL, type CfModel } from "#lib/server/ai/run-rest.js";
+import {
+    loadCloudflareConfig,
+    resolveCloudflareCreds,
+    isCloudflareConnected
+} from "#lib/server/ai/cloudflare-config.js";
+import { describeCloudflareError } from "#lib/server/ai/errors.js";
 import type { Actions, PageServerLoad } from "./$types";
 
 /**
@@ -22,13 +27,13 @@ import type { Actions, PageServerLoad } from "./$types";
  * INVARIANT: this module is the only place that decrypts the token on a load —
  * and only to mask it. The raw secret never leaves the server.
  */
-export const load: PageServerLoad = async ({ locals, platform, request }) => {
+export const load: PageServerLoad = async ({ locals, request }) => {
     if (!locals.user) {
         redirect(303, "/login");
     }
     const platformHint =
         request.headers.get("sec-ch-ua-platform")?.replace(/^"|"$/g, "") || request.headers.get("user-agent") || "";
-    if (!platform?.env?.DB) {
+    if (!env.DB) {
         return {
             connected: false,
             accountId: "",
@@ -39,11 +44,11 @@ export const load: PageServerLoad = async ({ locals, platform, request }) => {
         };
     }
 
-    const db = drizzle(platform.env.DB);
+    const db = drizzle(env.DB);
     const cfg = await loadCloudflareConfig(db, locals.user.id);
     const connected = isCloudflareConnected(cfg);
 
-    const key = platform.env.TOKEN_ENCRYPTION_KEY;
+    const key = env.TOKEN_ENCRYPTION_KEY;
     let maskedToken = "";
     if (cfg.tokenEncrypted && key) {
         try {
@@ -76,11 +81,11 @@ export const load: PageServerLoad = async ({ locals, platform, request }) => {
 };
 
 export const actions: Actions = {
-    save: async ({ request, locals, platform }) => {
+    save: async ({ request, locals }) => {
         if (!locals.user) {
             return fail(401, { error: "Not authenticated" });
         }
-        if (!platform?.env?.DB) {
+        if (!env.DB) {
             return fail(503, { error: "Database unavailable" });
         }
 
@@ -94,8 +99,8 @@ export const actions: Actions = {
             return fail(400, { error: "Enter your Cloudflare Account ID alongside the API token." });
         }
 
-        const db = drizzle(platform.env.DB);
-        const key = platform.env.TOKEN_ENCRYPTION_KEY;
+        const db = drizzle(env.DB);
+        const key = env.TOKEN_ENCRYPTION_KEY;
 
         // When a new token is provided, validate it by listing the account's models
         // (proves token + account + Workers AI permission) before encrypting it.
@@ -135,14 +140,14 @@ export const actions: Actions = {
         return { success: true };
     },
 
-    reset: async ({ locals, platform }) => {
+    reset: async ({ locals }) => {
         if (!locals.user) {
             return fail(401, { error: "Not authenticated" });
         }
-        if (!platform?.env?.DB) {
+        if (!env.DB) {
             return fail(503, { error: "Database unavailable" });
         }
-        const db = drizzle(platform.env.DB);
+        const db = drizzle(env.DB);
         await db.delete(userSettings).where(eq(userSettings.userId, locals.user.id));
         return { success: true, reset: true };
     }

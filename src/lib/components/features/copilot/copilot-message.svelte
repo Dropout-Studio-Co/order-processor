@@ -10,11 +10,11 @@
      * styled code block — the gateway models intermittently leak reasoning text in
      * fences, so we deliberately downgrade them rather than present them as code.
      */
-    import type { CopilotMessage } from "$lib/ai/types";
-    import type { MdBlock, MdInline } from "$lib/ai/markdown";
-    import { parseMarkdown } from "$lib/ai/markdown";
+    import type { CopilotMessage } from "#lib/ai/types.js";
+    import type { MdBlock, MdInline } from "#lib/ai/markdown.js";
+    import { parseMarkdown } from "#lib/ai/markdown.js";
     import CopilotToolBadge from "./copilot-tool-badge.svelte";
-    import { cn } from "$lib/utils";
+    import { cn } from "#lib/utils/index.js";
 
     let { message }: { message: CopilotMessage } = $props();
 

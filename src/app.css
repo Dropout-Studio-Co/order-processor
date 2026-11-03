@@ -653,7 +653,7 @@ textarea,
 
 /* CSS-only route view-transition; reads the DS motion tokens (--motion-base /
    --motion-ease-emphasized) — the cross-app motion cohesion contract. GSAP-driven
-   motion reads the mirrored TS tokens in $lib/motion/tokens.ts. */
+   motion reads the mirrored TS tokens in #lib/motion/tokens.ts. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation-duration: var(--motion-base);
