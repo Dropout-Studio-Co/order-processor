@@ -167,7 +167,11 @@ export const handleError: HandleServerError = ({ kind, error, event }) => {
     const normalized =
         kind === "app" || kind === "framework"
             ? { status: error.status, message: error.message, cause: error }
-            : { status: 500, message: "Internal Error", cause: error };
+            : {
+                  status: kind === "validation" ? 400 : 500,
+                  message: kind === "validation" ? "Bad Request" : "Internal Error",
+                  cause: error
+              };
 
     console.error(`[${errorId}] Unhandled error:`, {
         kind,

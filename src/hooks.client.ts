@@ -9,7 +9,11 @@ export const handleError: HandleClientError = ({ kind, error }) => {
     const normalized =
         kind === "app" || kind === "framework"
             ? { status: error.status, message: error.message, cause: error }
-            : { status: 500, message: "Internal Error", cause: error };
+            : {
+                  status: 500,
+                  message: "Internal Error",
+                  cause: error
+              };
 
     console.error(`[${errorId}] Client error:`, {
         kind,
