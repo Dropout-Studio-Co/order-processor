@@ -49,3 +49,5 @@ migrations/
 # Tool-owned agent config (Backpass writes it in its own layout); reformatting it
 # here is reverted on the next write and dirties the tree for no gain.
 .backpassrc.json
+# Vendored Dropout Design System metadata — generated verbatim by dropout-ds-sync.
+vendor/dropout-design-system/
