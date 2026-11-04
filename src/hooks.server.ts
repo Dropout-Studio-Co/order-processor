@@ -69,11 +69,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (!db) {
         // Happens when the D1 binding is unavailable (a misconfigured deployment).
+        // Still apply the security headers — this path serves real responses.
         console.warn("D1 database not available - auth disabled");
         event.locals.user = null;
         event.locals.session = null;
         event.locals.currentUser = null;
-        return resolve(event);
+        return applySecurityHeaders(await resolve(event));
     }
 
     // Synthesizes event.locals to bypass Google OAuth for local dev / Wrangler preview only.
