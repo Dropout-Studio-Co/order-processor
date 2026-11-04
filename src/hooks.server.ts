@@ -12,10 +12,14 @@ import { getCurrentUser } from "#lib/hooks/index.js";
 // serves Google OAuth avatars; fonts.* serves Google Fonts loaded in app.html.
 // Google One Tap loads the GSI script + renders a FedCM iframe from
 // accounts.google.com, so script-src/style-src/frame-src must allow it.
+// Cloudflare Web Analytics (automatic edge injection) loads its beacon from
+// static.cloudflareinsights.com and posts reports same-origin to /cdn-cgi/rum.
+// Keep the script host host-only: the injected URL is /beacon.min.js/v<version>,
+// and CSP path matching would block it unless the path ended in "/".
 // Passkey/WebAuthn needs no CSP change.
 const CSP = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client",
+    "script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
     "font-src https://fonts.gstatic.com",
     "img-src 'self' data: https://lh3.googleusercontent.com",
