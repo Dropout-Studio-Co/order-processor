@@ -19,7 +19,7 @@
         isSelected: boolean;
         onCellCommit: (column: CellColumn, value: string) => void;
         onCellNavigate: (rowIndex: number, column: CellColumn, direction: CellNavigationDirection) => void;
-        onToggleSelect: (event: MouseEvent) => void;
+        onToggleSelect: (event: MouseEvent | KeyboardEvent) => void;
         onDelete: () => void;
         onDuplicate: () => void;
     }
@@ -81,11 +81,11 @@
                 <input
                     type="checkbox"
                     checked={isSelected}
-                    onclick={(e) => onToggleSelect(e as unknown as MouseEvent)}
+                    onclick={(e) => onToggleSelect(e)}
                     onkeydown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
-                            onToggleSelect(e as unknown as MouseEvent);
+                            onToggleSelect(e);
                         }
                     }}
                     class="peer sr-only"

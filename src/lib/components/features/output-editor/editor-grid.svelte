@@ -19,7 +19,7 @@
         selection: ReadonlySet<number>;
         warningsByRow: ReadonlyMap<number, ReadonlyMap<CellColumn, string>>;
         onCellCommit: (rowIndex: number, column: CellColumn, value: string) => void;
-        onToggleSelect: (rowIndex: number, event: MouseEvent) => void;
+        onToggleSelect: (rowIndex: number, event: MouseEvent | KeyboardEvent) => void;
         onDeleteRow: (rowIndex: number) => void;
         onDuplicateRow: (rowIndex: number) => void;
         onAddRow: () => void;
@@ -150,8 +150,10 @@
                     ></Table.Head>
                     <Table.Head
                         class="text-ink-muted text-micro w-10 text-right  tracking-[0.1em]"
-                        aria-label="Row number">#</Table.Head
+                        aria-label="Row number"
                     >
+                        #
+                    </Table.Head>
                     {#each visibleColumns as column (column.key)}
                         <Table.Head
                             class={cn(

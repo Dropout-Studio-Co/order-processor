@@ -220,7 +220,7 @@
         isSelected && "bg-ink-2/50",
         warning && "ring-destructive/60 ring-1 ring-inset",
         isOverride &&
-            "before:bg-signal/80 before:absolute before:top-1 before:bottom-1 before:left-0 before:w-[2px] before:rounded-r"
+            "before:bg-signal/80 before:absolute before:top-1 before:bottom-1 before:left-0 before:w-0.5 before:rounded-r"
     )}
 >
     {#if isEditing}
@@ -263,8 +263,10 @@
                 id="cell-warn-{rowIndex}-{column}"
                 transition:scale={{ duration: motionDuration("fast"), start: 0.6 }}
                 class="text-destructive pointer-events-none absolute top-0.5 right-1 text-xs leading-none"
-                aria-hidden="true">⚠</span
+                aria-hidden="true"
             >
+                ⚠
+            </span>
         {/if}
     {/if}
 </div>

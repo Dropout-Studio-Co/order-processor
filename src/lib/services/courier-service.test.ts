@@ -100,10 +100,7 @@ describe("processOrders", () => {
     });
 
     it("keeps unicode recipient names and notes intact", () => {
-        const orders = processOrders(
-            [header(), row({ order: "#1001", name: "মোহাম্মদ আলী", note: "দুপুরের আগে" })],
-            user
-        );
+        const orders = processOrders([header(), row({ order: "#1001", name: "মোহাম্মদ আলী", note: "দুপুরের আগে" })], user);
 
         expect(orders[0]?.Name).toBe("মোহাম্মদ আলী");
         expect(orders[0]?.Note).toBe("দুপুরের আগে");

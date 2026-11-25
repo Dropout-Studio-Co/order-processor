@@ -79,6 +79,7 @@
             )}
         >
             <div use:reveal={{ distance: "sm", delay: 0.1 }} class="flex w-full min-w-0 justify-center lg:block">
+                <h2 class="sr-only">Upload and edit orders</h2>
                 <OrderProcessor currentUser={data.currentUser} selectedCourier={courierService.value} bind:editorOpen />
             </div>
 

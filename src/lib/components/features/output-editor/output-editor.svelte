@@ -229,7 +229,7 @@
     };
 
     // SvelteSet is reactive — mutate in place rather than reassigning.
-    const toggleSelect = (rowIndex: number, event: MouseEvent) => {
+    const toggleSelect = (rowIndex: number, event: MouseEvent | KeyboardEvent) => {
         const isShift = event.shiftKey;
 
         if (isShift && lastSelectAnchor !== null) {

@@ -83,7 +83,7 @@
     <div class="animate-in fade-in slide-in-from-top-2 w-full max-w-sm duration-300">
         <div class="mb-4 flex items-center gap-3">
             <div class="bg-hair h-px flex-1"></div>
-            <Eyebrow as="span" class="text-micro whitespace-nowrap">SteadFast Settings</Eyebrow>
+            <Eyebrow as="h2" class="text-micro whitespace-nowrap">SteadFast Settings</Eyebrow>
             <div class="bg-hair h-px flex-1"></div>
         </div>
 

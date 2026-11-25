@@ -222,6 +222,8 @@
     {:else}
         <div
             role="button"
+            aria-label="Upload order CSV or Excel file"
+            aria-disabled={isDisabled}
             tabindex={isDisabled ? -1 : 0}
             class={cn(
                 "flex w-full touch-manipulation flex-col items-center justify-center rounded-xl border border-dashed transition-all duration-200 ease-[var(--ease)]",
